@@ -1,0 +1,47 @@
+# IFK — Inversiones Friomak SpA
+
+# --- Página de inicio ---
+DirectoryIndex index.php
+
+# --- URLs amigables (activar también URLS_AMIGABLES en config.php) ---
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # No reescribir archivos ni carpetas que existen
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+  RewriteRule ^ index.php [L]
+</IfModule>
+
+# --- Protección de carpetas internas ---
+<IfModule mod_rewrite.c>
+  RewriteRule ^(storage|includes)/ - [F,L]
+</IfModule>
+<FilesMatch "\.(csv|log|md)$">
+  Require all denied
+</FilesMatch>
+
+# --- Compresión ---
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain application/javascript image/svg+xml application/json
+</IfModule>
+
+# --- Caché de estáticos ---
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+  ExpiresByType image/svg+xml "access plus 6 months"
+  ExpiresByType image/jpeg "access plus 6 months"
+  ExpiresByType image/png "access plus 6 months"
+  ExpiresByType image/webp "access plus 6 months"
+</IfModule>
+
+# --- Seguridad básica ---
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+ErrorDocument 404 /index.php

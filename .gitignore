@@ -1,0 +1,10 @@
+# Datos locales de cada instalación: ajustes, token del panel, solicitudes y respaldos.
+# Se conserva la carpeta y su .htaccess para que exista al clonar en el servidor.
+/storage/*
+!/storage/.htaccess
+!/storage/.gitkeep
+
+.DS_Store
+Thumbs.db
+*.log
+.claude/

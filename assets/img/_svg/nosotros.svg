@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 620" width="720" height="620" role="img" aria-label="Equipo técnico y taller de IFK">
+<defs>
+<linearGradient id="nb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d2f52"/><stop offset="1" stop-color="#061a2e"/></linearGradient>
+<radialGradient id="ng" cx=".6" cy=".25" r=".75"><stop offset="0" stop-color="#3d8fe0" stop-opacity=".4"/><stop offset="1" stop-color="#3d8fe0" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="720" height="620" fill="url(#nb)"/><rect width="720" height="620" fill="url(#ng)"/>
+<path d="M50 512h620" stroke="#1d5b96" stroke-width="5"/>
+<!-- bodega -->
+<g transform="translate(70,120)">
+<path d="M0 90 150 0l150 90v300H0Z" fill="#0a2540" stroke="#3d8fe0" stroke-width="4" stroke-linejoin="round"/>
+<rect x="52" y="150" width="90" height="70" rx="8" fill="#12406b" stroke="#7fc0f7" stroke-width="3"/>
+<rect x="166" y="150" width="90" height="70" rx="8" fill="#12406b" stroke="#7fc0f7" stroke-width="3" opacity=".7"/>
+<rect x="90" y="270" width="130" height="120" rx="8" fill="#061a2e" stroke="#7fc0f7" stroke-width="3"/>
+<path d="M155 270v120" stroke="#7fc0f7" stroke-width="3" opacity=".6"/>
+</g>
+<!-- técnicos -->
+<g transform="translate(400,250)" stroke="#7fc0f7" stroke-width="4" fill="#12406b" stroke-linejoin="round">
+<circle cx="60" cy="34" r="30"/>
+<path d="M60 68c-44 0-66 30-66 76v116h132V144c0-46-22-76-66-76Z"/>
+<path d="M28 8h64" stroke-width="9" stroke-linecap="round"/>
+<g transform="translate(122,42)">
+<circle cx="52" cy="30" r="26"/>
+<path d="M52 60c-38 0-58 26-58 66v104h116V126c0-40-20-66-58-66Z"/>
+<path d="M24 8h56" stroke-width="8" stroke-linecap="round"/>
+</g>
+</g>
+<!-- caja de herramientas -->
+<g transform="translate(410,430)">
+<rect x="0" y="0" width="120" height="80" rx="10" fill="#0a2540" stroke="#8fd0ff" stroke-width="3"/>
+<path d="M42 0v-16h36V0" fill="none" stroke="#8fd0ff" stroke-width="4"/>
+<path d="M14 40h92" stroke="#8fd0ff" stroke-width="4" opacity=".7"/>
+</g>
+<!-- copos -->
+<g stroke="#bcd8f5" stroke-width="3" opacity=".4" stroke-linecap="round">
+<g transform="translate(620,110)"><path d="M0-26v52M-26 0h52M-18-18 18 18M18-18-18 18"/></g>
+<g transform="translate(540,64) scale(.6)"><path d="M0-26v52M-26 0h52M-18-18 18 18M18-18-18 18"/></g>
+</g>
+</svg>

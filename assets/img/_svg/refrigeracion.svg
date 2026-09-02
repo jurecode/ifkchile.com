@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" width="800" height="560" role="img" aria-label="Cámara frigorífica">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d2f52"/><stop offset="1" stop-color="#061a2e"/></linearGradient>
+<radialGradient id="gl" cx=".7" cy=".25" r=".7"><stop offset="0" stop-color="#3d8fe0" stop-opacity=".45"/><stop offset="1" stop-color="#3d8fe0" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="800" height="560" fill="url(#bg)"/><rect width="800" height="560" fill="url(#gl)"/>
+<!-- sala -->
+<path d="M90 430h620" stroke="#1d5b96" stroke-width="4"/>
+<!-- cámara -->
+<rect x="140" y="120" width="380" height="310" rx="14" fill="#0a2540" stroke="#3d8fe0" stroke-width="4"/>
+<rect x="170" y="150" width="150" height="280" rx="8" fill="#123a63" stroke="#7fc0f7" stroke-width="3"/>
+<circle cx="300" cy="300" r="9" fill="#7fc0f7"/>
+<rect x="188" y="178" width="112" height="60" rx="5" fill="#0a2540" stroke="#7fc0f7" stroke-width="2.5"/>
+<path d="M204 208h34M258 196v24" stroke="#8fd0ff" stroke-width="3" stroke-linecap="round"/>
+<!-- evaporador dentro -->
+<rect x="352" y="164" width="140" height="56" rx="7" fill="#12406b" stroke="#7fc0f7" stroke-width="3"/>
+<path d="M362 220v14M392 220v14M422 220v14M452 220v14M482 220v14" stroke="#8fd0ff" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+<!-- estanterías -->
+<g stroke="#1d5b96" stroke-width="4">
+<path d="M352 300h140M352 360h140M352 420h140"/>
+</g>
+<g fill="#1a4f83"><rect x="364" y="272" width="40" height="26" rx="4"/><rect x="414" y="266" width="52" height="32" rx="4"/><rect x="360" y="330" width="58" height="28" rx="4"/><rect x="430" y="336" width="44" height="22" rx="4"/></g>
+<!-- unidad condensadora exterior -->
+<g transform="translate(556,232)">
+<rect x="0" y="0" width="170" height="130" rx="12" fill="#0a2540" stroke="#3d8fe0" stroke-width="4"/>
+<circle cx="60" cy="65" r="38" fill="none" stroke="#7fc0f7" stroke-width="3"/>
+<path d="M60 27v76M22 65h76M33 38l54 54M87 38 33 92" stroke="#7fc0f7" stroke-width="2.5" opacity=".7"/>
+<circle cx="60" cy="65" r="9" fill="#8fd0ff"/>
+<rect x="116" y="24" width="36" height="82" rx="6" fill="#12406b" stroke="#7fc0f7" stroke-width="2.5"/>
+</g>
+<path d="M520 292h36" stroke="#2f7fd1" stroke-width="8" stroke-linecap="round"/>
+<!-- copos -->
+<g stroke="#bcd8f5" stroke-width="3" opacity=".5" stroke-linecap="round">
+<g transform="translate(620,110)"><path d="M0-24v48M-24 0h48M-17-17 17 17M17-17-17 17"/></g>
+<g transform="translate(700,170) scale(.6)"><path d="M0-24v48M-24 0h48M-17-17 17 17M17-17-17 17"/></g>
+<g transform="translate(96,180) scale(.75)"><path d="M0-24v48M-24 0h48M-17-17 17 17M17-17-17 17"/></g>
+</g>
+</svg>

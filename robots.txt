@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /storage/
+Disallow: /includes/
+Disallow: /panel/
+Disallow: /deploy.php
+Allow: /
+
+Sitemap: https://ifkchile.com/sitemap.xml
