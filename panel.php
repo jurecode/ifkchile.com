@@ -15,14 +15,18 @@ declare(strict_types=1);
 
 define('RAIZ', __DIR__);
 
-$CFG = is_file(RAIZ . '/config.php') ? require RAIZ . '/config.php' : null;
-if (!is_array($CFG)) {
-    $CFG = null;
-} else {
+/** Lee config.php. Devuelve null si todavía no existe. */
+function cargar_config(): ?array {
+    if (!is_file(RAIZ . '/config.php')) return null;
+    $c = require RAIZ . '/config.php';
+    if (!is_array($c)) return null;
     /* Sólo el token y la clave son obligatorios; el resto tiene valor por defecto. */
-    $CFG += ['token' => '', 'repo' => '', 'rama' => 'main', 'clave' => ''];
-    if (trim((string)$CFG['rama']) === '') $CFG['rama'] = 'main';
+    $c += ['token' => '', 'repo' => '', 'rama' => 'main', 'clave' => ''];
+    if (trim((string)$c['rama']) === '') $c['rama'] = 'main';
+    return $c;
 }
+
+$CFG = cargar_config();
 
 session_name('panel');
 session_start([
@@ -56,6 +60,38 @@ function git(array $args): array {
 
 function hay_git(): bool { return git(['--version'])[0] === 0; }
 function es_repo(): bool { return is_dir(RAIZ . '/.git'); }
+
+/* ---------------- Primera vez ---------------- */
+
+/** Deja escrito config.php en esta misma carpeta. */
+function guardar_config(string $token, string $clave, string $repo): bool {
+    $php = "<?php\n"
+         . "/* Escrito por el panel el " . date('d-m-Y H:i') . ". No se sube a GitHub. */\n\n"
+         . "return [\n"
+         . "    'token' => " . var_export($token, true) . ",\n"
+         . "    'clave' => " . var_export($clave, true) . ",\n"
+         . "    'repo'  => " . var_export($repo, true) . ",\n"
+         . "];\n";
+
+    if (@file_put_contents(RAIZ . '/config.php', $php, LOCK_EX) === false) return false;
+    @chmod(RAIZ . '/config.php', 0600);
+    return true;
+}
+
+/** Que el navegador no pueda abrir config.php aunque PHP se caiga. */
+function proteger_config(): void {
+    $f   = RAIZ . '/.htaccess';
+    $txt = is_file($f) ? (string)file_get_contents($f) : '';
+    if (str_contains($txt, 'config.php')) return;
+
+    $bloque = "\n# El archivo con el token no se sirve nunca por el navegador\n"
+            . "<FilesMatch \"^config(-ejemplo)?\\.php$\">\n"
+            . "  <IfModule mod_authz_core.c>\n    Require all denied\n  </IfModule>\n"
+            . "  <IfModule !mod_authz_core.c>\n    Order allow,deny\n    Deny from all\n  </IfModule>\n"
+            . "</FilesMatch>\n";
+
+    @file_put_contents($f, ($txt === '' ? '' : rtrim($txt) . "\n") . $bloque, LOCK_EX);
+}
 
 /* ---------------- GitHub ---------------- */
 
@@ -443,7 +479,37 @@ if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(16));
 $csrf_ok = $_SERVER['REQUEST_METHOD'] === 'POST'
         && hash_equals($_SESSION['csrf'], (string)($_POST['csrf'] ?? ''));
 
-if ($CFG && $_SERVER['REQUEST_METHOD'] === 'POST' && $csrf_ok) {
+/* Primera vez: se escribe config.php y, en el mismo golpe, se clona el sitio. */
+if (!$CFG && $_SERVER['REQUEST_METHOD'] === 'POST' && $csrf_ok) {
+    $token = trim((string)($_POST['token'] ?? ''));
+    $clave = trim((string)($_POST['clave'] ?? ''));
+    $repo  = trim((string)($_POST['repo']  ?? ''));
+
+    if ($token === '' || $clave === '') {
+        $ok = false; $aviso = 'Faltan el token o la clave.';
+    } elseif (mb_strlen($clave) < 6) {
+        $ok = false; $aviso = 'Ponle a la clave al menos 6 letras.';
+    } elseif (github_usuario(['token' => $token]) === '') {
+        $ok = false; $aviso = 'GitHub no reconoció ese token. Revisa que esté completo y que no haya vencido.';
+    } elseif (!guardar_config($token, $clave, $repo)) {
+        $ok = false; $aviso = 'No pude escribir config.php aquí. Dale permiso de escritura a esta carpeta y vuelve a intentarlo.';
+    } else {
+        proteger_config();
+        $CFG = cargar_config();
+        session_regenerate_id(true);
+        $_SESSION['ok'] = true;
+        $dentro = true;
+
+        if (!hay_git()) {
+            $ok = false;
+            $aviso = 'Guardé la configuración, pero este servidor no deja ejecutar git desde PHP. Pídele al soporte que habilite proc_open.';
+        } else {
+            [$ok, $aviso, $consola] = palabra_instalar($CFG);
+        }
+    }
+}
+
+if ($CFG && $_SERVER['REQUEST_METHOD'] === 'POST' && $csrf_ok && $aviso === '') {
 
     /* Entrar */
     if (!$dentro) {
@@ -509,6 +575,11 @@ $csrf = $_SESSION['csrf'];
   input:focus { outline: 2px solid #2563eb; outline-offset: -1px; border-color: #2563eb; }
   button { padding: 12px 18px; font: inherit; border: 0; border-radius: 8px;
            background: #16181d; color: #fff; cursor: pointer; }
+  form.alta { flex-direction: column; gap: 16px; }
+  form.alta label { display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; color: #6b7280; }
+  form.alta small { color: #8b919b; font-size: 12px; }
+  form.alta code { font-size: 12px; background: rgba(127,127,127,.14); padding: 1px 4px; border-radius: 3px; }
+  form.alta button { align-self: flex-start; }
   .palabras { margin: 10px 2px 0; color: #6b7280; font-size: 13px; }
   .aviso { margin-top: 18px; padding: 12px 14px; border-radius: 8px;
            background: #e8f3ec; border: 1px solid #bcdcc8; }
@@ -527,9 +598,30 @@ $csrf = $_SESSION['csrf'];
 <main>
 
 <?php if (!$CFG): ?>
-  <h1>Falta la configuración</h1>
-  <p class="sub">Copia el archivo <code>config-ejemplo.php</code> como <code>config.php</code>
-     y escribe adentro tu token, la dirección del repositorio y una clave.</p>
+  <h1>Panel</h1>
+  <p class="sub">Primera vez en esta carpeta. Con estos tres datos se deja listo solo:
+     escribe el <code>config.php</code>, lo protege, y clona el sitio.</p>
+  <form method="post" class="alta">
+    <label>Token de GitHub
+      <input type="password" name="token" autofocus autocomplete="off" spellcheck="false"
+             placeholder="ghp_...">
+      <small>Con permiso <code>repo</code>. Se guarda sólo aquí, nunca viaja a GitHub.</small>
+    </label>
+    <label>Clave para entrar después
+      <input type="password" name="clave" autocomplete="new-password" placeholder="mínimo 6 letras">
+    </label>
+    <label>Repositorio
+      <input name="repo" autocomplete="off" spellcheck="false"
+             placeholder="<?= e(preg_replace('/^www\./', '', explode(':', (string)($_SERVER['HTTP_HOST'] ?? 'midominio.cl'))[0])) ?>">
+      <small>Si lo dejas vacío usa el nombre de este dominio. Si no existe en GitHub, lo crea privado.</small>
+    </label>
+    <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
+    <button>Guardar y clonar</button>
+  </form>
+  <?php if ($aviso): ?>
+    <div class="aviso <?= $ok ? '' : 'mal' ?>"><?= e($aviso) ?></div>
+  <?php endif; ?>
+  <?php if ($consola !== ''): ?><pre><?= e($consola) ?></pre><?php endif; ?>
 
 <?php elseif (!$dentro): ?>
   <h1>Panel</h1>
