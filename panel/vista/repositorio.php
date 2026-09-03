@@ -110,8 +110,9 @@ $colaTok = $token !== '' ? '•••• ' . substr($token, -4) : '';
   <ol class="lista-num">
     <li>Crea el repositorio en GitHub (puede ser privado) y pega su dirección arriba.</li>
     <li>Genera un token con permiso <strong>repo</strong> y guárdalo en este panel.</li>
-    <li>En el servidor, crea <code>storage/deploy.json</code> con <code>{"clave":"…"}</code> usando la misma clave de arriba.</li>
-    <li>En el servidor, la carpeta del sitio debe ser una copia del repositorio (<code>git clone</code> la primera vez).</li>
+    <li>Sube el sitio al servidor (por FTP o <code>git clone</code>, da lo mismo).</li>
+    <li>En el servidor, crea <code>storage/deploy.json</code> con la clave de arriba, el repositorio y —si es privado— un token:
+      <code>{"clave":"…","repo":"usuario/repositorio","rama":"main","usuario":"…","token":"…"}</code></li>
     <li>Listo: cada cambio se publica con los botones 1 y 2.</li>
   </ol>
 </div>

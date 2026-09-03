@@ -45,14 +45,15 @@ Configuración, una sola vez:
 4. En el servidor, crea el archivo `storage/deploy.json`:
 
    ```json
-   {"clave":"una-clave-larga-e-inventada","rama":"main","repo":"","usuario":"","token":""}
+   {"clave":"una-clave-larga-e-inventada","repo":"jurecode/ifkchile.com","rama":"main","usuario":"jurecode","token":"ghp_…"}
    ```
 
-   (`repo`, `usuario` y `token` sólo si el repositorio es privado). Escribe esa misma clave y la URL
+   `usuario` y `token` sólo hacen falta si el repositorio es privado. Escribe esa misma clave y la URL
    `https://ifkchile.com/deploy.php` en el panel. Va en `storage/` a propósito: esa carpeta no viaja en el
    repositorio, así la configuración del servidor sobrevive a cada actualización.
-5. En el servidor, la carpeta del sitio debe ser un clon del repositorio (`git clone` la primera vez).
 
+5. En el servidor la carpeta puede ser un clon de git **o** una copia subida por FTP: `deploy.php` detecta
+   cuál es y usa el método que corresponda (ver abajo).
 Después, cada actualización son dos botones:
 
 - **Subir a GitHub** — hace `add` + `commit` + `push` de todo lo que cambió en esta carpeta.
@@ -64,7 +65,12 @@ Notas:
   carpeta bloqueada por `.htaccess` y excluida del repositorio (`.gitignore`).
 - `storage/` no viaja a GitHub, así que **el estado publicado/próximamente es propio de cada instalación**:
   para publicar el sitio real se cambia desde el panel del servidor (`ifkchile.com/panel/`).
-- Si el hosting bloquea la ejecución de comandos (`proc_open`), el panel lo avisa y la subida debe hacerse por FTP o desde tu computador.
+- **`deploy.php` funciona de dos formas.** Si la carpeta del servidor es un clon de git y el hosting permite ejecutar
+  comandos, hace `fetch` + `reset --hard`. Si no —hosting compartido, sitio subido por FTP— descarga el ZIP del
+  repositorio desde GitHub y reemplaza los archivos, sin necesitar git. En ese segundo modo, los archivos que se
+  **eliminen** del repositorio hay que borrarlos a mano en el servidor.
+- El botón *Subir a GitHub* del panel sí necesita `git` y `proc_open` en la máquina donde corre el panel. Si el hosting
+  los bloquea, se sube desde tu computador y el servidor se actualiza igual con el botón *Actualizar servidor*.
 
 ---
 
