@@ -1,13 +1,8 @@
-# Datos locales de cada instalación: ajustes, token del panel, solicitudes y respaldos.
-# Se conserva la carpeta y su .htaccess para que exista al clonar en el servidor.
-/storage/*
-!/storage/.htaccess
-!/storage/.gitkeep
+# El archivo con el token y la clave se queda en cada servidor, no en GitHub.
+config.php
 
 .DS_Store
 Thumbs.db
 *.log
 .claude/
-
-# Respaldos comprimidos del sitio
 *.zip
