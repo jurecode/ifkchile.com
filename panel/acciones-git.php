@@ -126,3 +126,58 @@ if ($accion === 'git_conectar') {
         panel_log('github', 'error al conectar: ' . $error);
     }
 }
+
+/* --- Traer los cambios publicados en GitHub --- */
+if ($accion === 'git_traer') {
+    $salida = [];
+    $error  = null;
+    $rama   = $g['rama'] ?: 'main';
+
+    if (!git_disponible())            $error = 'Git no está disponible en este servidor.';
+    elseif (!es_repo())               $error = 'Esta carpeta no está conectada con GitHub. Usa primero "Conectar con GitHub".';
+    elseif (trim($g['repo']) === '')  $error = 'Falta la dirección del repositorio.';
+    elseif (trim($g['token']) === '') $error = 'Falta el token de GitHub.';
+
+    /* Nunca se pisan cambios hechos aquí: primero hay que subirlos */
+    if (!$error) {
+        [, $sucio] = correr(['git', 'status', '--porcelain']);
+        if ($sucio !== '') {
+            $error = 'Esta carpeta tiene cambios sin subir. Usa primero "Subir a GitHub" para no perderlos.';
+            $salida[] = $sucio;
+        }
+    }
+
+    if (!$error) {
+        [$c, $o] = correr(['git', 'fetch', git_url_push($g), $rama]);
+        $salida[] = "$ git fetch origin " . $rama . "\n" . (ocultar_token($o, $g['token']) ?: 'ok');
+        if ($c !== 0) {
+            $error = 'No se pudo leer el repositorio. Revisa la dirección, la rama y el token.';
+        } else {
+            [, $pendientes] = correr(['git', 'rev-list', '--count', 'HEAD..FETCH_HEAD']);
+            $nuevos = (int)trim($pendientes);
+
+            if ($nuevos === 0) {
+                $aviso = ['tipo' => 'ok', 'texto' => 'El sitio ya estaba al día con GitHub.', 'consola' => implode("\n\n", $salida)];
+                panel_log('github', 'pull sin novedades');
+            } else {
+                [$c, $o] = correr(['git', 'merge', '--ff-only', 'FETCH_HEAD']);
+                $salida[] = "$ git merge --ff-only\n" . ($o ?: 'ok');
+                if ($c !== 0) {
+                    $error = 'El historial de esta carpeta se separó del de GitHub, así que no se pudo actualizar sola.';
+                } else {
+                    [, $head] = correr(['git', 'log', '-1', '--pretty=%h · %s']);
+                    $salida[] = 'Versión actual: ' . $head;
+                    $aviso = ['tipo' => 'ok',
+                        'texto'   => 'Sitio actualizado con ' . $nuevos . ' cambio(s) desde GitHub.',
+                        'consola' => implode("\n\n", $salida)];
+                    panel_log('github', 'pull de ' . $nuevos . ' commit(s)');
+                }
+            }
+        }
+    }
+
+    if ($error) {
+        $aviso = ['tipo' => 'error', 'texto' => $error, 'consola' => implode("\n\n", $salida)];
+        panel_log('github', 'error al traer: ' . $error);
+    }
+}

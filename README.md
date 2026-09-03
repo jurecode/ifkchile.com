@@ -46,8 +46,11 @@ Configuración, una sola vez:
 4. Si esa carpeta todavía no está enlazada (por ejemplo, el sitio se subió por FTP), aparece el botón
    **Conectar con GitHub**: enlaza la carpeta sin tocar los archivos, sólo alineando el historial.
 
-Después, el botón **Subir a GitHub** hace `add` + `commit` + `push` de todo lo que cambió en la carpeta, y
-**Ver estado** muestra la rama, el último commit y lo que falta por subir.
+Después quedan tres botones:
+
+- **Subir a GitHub** — `add` + `commit` + `push` de todo lo que cambió en la carpeta.
+- **Traer cambios** — actualiza la carpeta con la última versión publicada (sólo si no hay cambios locales sin subir).
+- **Ver estado** — rama, último commit y archivos pendientes.
 
 Notas:
 

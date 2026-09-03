@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         /* --- Acciones de repositorio --- */
-        if (in_array($accion, ['git_estado', 'git_subir', 'git_conectar'], true)) {
+        if (in_array($accion, ['git_estado', 'git_subir', 'git_conectar', 'git_traer'], true)) {
             require __DIR__ . '/acciones-git.php';
         }
 

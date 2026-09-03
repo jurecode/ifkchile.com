@@ -84,6 +84,19 @@ $colaTok = $token !== '' ? '•••• ' . substr($token, -4) : '';
 </div>
 
 <div class="tarjeta">
+  <h2>Traer cambios de GitHub</h2>
+  <p class="intro">
+    Actualiza esta carpeta con la última versión publicada. Sólo avanza si aquí no hay cambios sin subir,
+    así nunca se pierde nada de lo que hayas hecho en este servidor.
+  </p>
+  <form method="post" action="index.php?v=repositorio" onsubmit="return confirm('¿Actualizar esta carpeta con la última versión de GitHub?')">
+    <input type="hidden" name="csrf" value="<?= e(csrf()) ?>">
+    <input type="hidden" name="accion" value="git_traer">
+    <button class="btn btn--osc" type="submit" <?= ($hayGit && $repoOk) ? '' : 'disabled' ?>>Traer cambios</button>
+  </form>
+</div>
+
+<div class="tarjeta">
   <h2>Estado del repositorio</h2>
   <p class="intro">Muestra la rama actual, el último commit y los archivos pendientes de subir.</p>
   <form method="post" action="index.php?v=repositorio">
