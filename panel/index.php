@@ -71,13 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         /* --- Estado del sitio --- */
         if ($accion === 'estado') {
             $coming = ($_POST['modo'] ?? 'soon') === 'soon';
-            $lanz   = trim((string)($_POST['lanzamiento'] ?? ''));
             $clave  = preg_replace('/[^A-Za-z0-9_-]/', '', (string)($_POST['preview_key'] ?? '')) ?: 'ifk2026';
-            guardar_ajustes([
-                'coming_soon' => $coming,
-                'lanzamiento' => $lanz !== '' ? str_replace('T', ' ', $lanz) . (strlen($lanz) === 16 ? ':00' : '') : $AJ['lanzamiento'],
-                'preview_key' => $clave,
-            ]);
+            guardar_ajustes(['coming_soon' => $coming, 'preview_key' => $clave]);
             panel_log('estado', $coming ? 'sitio en PRÓXIMAMENTE' : 'sitio PUBLICADO');
             $aviso = ['tipo' => 'ok', 'texto' => $coming
                 ? 'El sitio público muestra la portada "Próximamente".'

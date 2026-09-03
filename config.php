@@ -17,7 +17,6 @@ function ajustes_defecto(): array {
     return [
         'coming_soon'   => true,
         'preview_key'   => 'ifk2026',
-        'lanzamiento'   => '2026-10-15 09:00:00',
         'password_hash' => '',
         'imagenes'      => [],   // clave => ruta relativa (si se cambió la extensión)
         'git'           => [
@@ -78,7 +77,6 @@ $SITE = [
         // 'linkedin'  => 'https://linkedin.com/company/...',
         // 'facebook'  => 'https://facebook.com/...',
     ],
-    'lanzamiento'  => $AJ['lanzamiento'],      // cuenta regresiva del Coming Soon (editable en el panel)
 ];
 
 /* Helpers */

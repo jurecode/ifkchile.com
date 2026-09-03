@@ -18,12 +18,7 @@
     </div>
 
     <div class="campos">
-      <div class="campo">
-        <label for="lanzamiento">Fecha de lanzamiento <small>(cuenta regresiva de la portada)</small></label>
-        <input id="lanzamiento" name="lanzamiento" type="datetime-local"
-               value="<?= e(date('Y-m-d\TH:i', strtotime($AJ['lanzamiento']) ?: time())) ?>">
-      </div>
-      <div class="campo">
+      <div class="campo campo--full">
         <label for="preview_key">Clave de previsualización</label>
         <input id="preview_key" name="preview_key" type="text" value="<?= e($AJ['preview_key']) ?>">
         <small class="hint">Para revisar el sitio real mientras está oculto:

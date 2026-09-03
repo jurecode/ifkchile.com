@@ -8,3 +8,6 @@
 Thumbs.db
 *.log
 .claude/
+
+# Respaldos comprimidos del sitio
+*.zip
