@@ -247,6 +247,42 @@ function palabra_traer(array $c, string $modo = ''): array {
     return [true, $aviso, implode("\n\n", $log)];
 }
 
+function palabra_instalar(array $c): array {
+    preparar($c);
+    $log = [];
+
+    [$cod, $sal] = git(['fetch', url_token($c), $c['rama']]);
+    $log[] = "$ git fetch\n" . (ocultar($sal, $c['token']) ?: 'ok');
+    if ($cod !== 0) {
+        return [false, 'No se pudo leer GitHub. Revisa el token, la dirección y la rama.', implode("\n\n", $log)];
+    }
+
+    /* Enlaza la carpeta con GitHub sin tocar ningún archivo: sirve para un
+       sitio que ya estaba funcionando en el servidor. */
+    [$cod, $sal] = git(['reset', 'FETCH_HEAD']);
+    $log[] = "$ git reset\n" . ($sal ?: 'ok');
+    if ($cod !== 0) {
+        return [false, 'No se pudo enlazar la carpeta con GitHub. Mira el detalle.', implode("\n\n", $log)];
+    }
+
+    /* Lo que está en GitHub y falta aquí sí se baja: no pisa nada, sólo completa. */
+    [, $faltan] = git(['ls-files', '--deleted']);
+    $faltan = array_values(array_filter(explode("\n", trim($faltan))));
+    if ($faltan) {
+        git(array_merge(['checkout', '--'], $faltan));
+        $log[] = 'Se bajaron los que faltaban aquí: ' . implode(', ', $faltan);
+    }
+
+    [, $sucio] = git(['status', '--porcelain']);
+    $n = $sucio === '' ? 0 : count(explode("\n", $sucio));
+    $log[] = 'Ojo: al escribir "subir", GitHub queda igual que esta carpeta; lo que borres aquí, se borra allá.';
+    if ($sucio !== '') $log[] = $sucio;
+
+    return [true, 'Listo: la carpeta quedó enlazada con GitHub y no se pisó ningún archivo tuyo. '
+        . ($n ? 'Hay ' . $n . ' diferencia(s); revísalas abajo y escribe "subir".' : 'Está todo igual que GitHub.'),
+        implode("\n\n", $log)];
+}
+
 function palabra_ayuda(): array {
     return [true, 'Palabras que entiende el panel:', implode("\n", [
         'estado            cómo está la carpeta y qué falta',
@@ -254,6 +290,7 @@ function palabra_ayuda(): array {
         'subir cambié el logo   igual, pero deja escrito qué hiciste',
         'traer             guarda lo tuyo y baja lo nuevo de GitHub',
         'traer github      deja esta carpeta igual que GitHub (guarda lo de aquí aparte)',
+        'instalar          enlaza con GitHub un sitio que ya está en el servidor, sin tocar nada',
         'ayuda             esta lista',
         'salir             cierra la sesión',
     ])];
@@ -299,6 +336,7 @@ if ($CFG && $_SERVER['REQUEST_METHOD'] === 'POST' && $csrf_ok) {
                 case 'estado':  [$ok, $aviso, $consola] = palabra_estado($CFG); break;
                 case 'subir':   [$ok, $aviso, $consola] = palabra_subir($CFG, $resto); break;
                 case 'traer':   [$ok, $aviso, $consola] = palabra_traer($CFG, $resto); break;
+                case 'instalar':[$ok, $aviso, $consola] = palabra_instalar($CFG); break;
                 case 'ayuda':   [$ok, $aviso, $consola] = palabra_ayuda(); break;
                 case 'salir':
                     session_destroy();
@@ -376,7 +414,7 @@ $csrf = $_SESSION['csrf'];
     <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
     <button>Hacer</button>
   </form>
-  <p class="palabras">estado · subir · traer · ayuda · salir</p>
+  <p class="palabras">estado · subir · traer · instalar · ayuda · salir</p>
 
   <?php if ($aviso): ?>
     <div class="aviso <?= $ok ? '' : 'mal' ?>"><?= e($aviso) ?></div>
