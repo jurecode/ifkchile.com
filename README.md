@@ -43,6 +43,8 @@ Configuración, una sola vez:
    (o *Contents: read and write* si es de tipo *fine-grained*).
 3. En el panel → **Repositorio**, pega la dirección (`github.com/usuario/repositorio.git`), la rama, el usuario y el
    token, y guarda.
+4. Si esa carpeta todavía no está enlazada (por ejemplo, el sitio se subió por FTP), aparece el botón
+   **Conectar con GitHub**: enlaza la carpeta sin tocar los archivos, sólo alineando el historial.
 
 Después, el botón **Subir a GitHub** hace `add` + `commit` + `push` de todo lo que cambió en la carpeta, y
 **Ver estado** muestra la rama, el último commit y lo que falta por subir.

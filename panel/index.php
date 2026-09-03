@@ -9,6 +9,7 @@
 declare(strict_types=1);
 
 require __DIR__ . '/lib.php';
+@set_time_limit(300);   // las operaciones con GitHub pueden demorar
 panel_sesion();
 
 $vista  = $_GET['v'] ?? 'estado';
@@ -103,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         /* --- Acciones de repositorio --- */
-        if (in_array($accion, ['git_estado', 'git_subir'], true)) {
+        if (in_array($accion, ['git_estado', 'git_subir', 'git_conectar'], true)) {
             require __DIR__ . '/acciones-git.php';
         }
 

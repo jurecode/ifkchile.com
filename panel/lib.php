@@ -8,7 +8,7 @@ require __DIR__ . '/../config.php';
 
 const PANEL_LOG      = __DIR__ . '/../storage/panel.log';
 const PANEL_INTENTOS = __DIR__ . '/../storage/intentos.json';
-const RAIZ           = __DIR__ . '/..';
+define('RAIZ', realpath(__DIR__ . '/..') ?: __DIR__ . '/..');
 
 /* ---------------- Sesión y autenticación ---------------- */
 
@@ -197,16 +197,50 @@ function shell_disponible(): bool {
     return function_exists('proc_open') && !in_array('proc_open', $off, true);
 }
 
-/** Ejecuta un comando en la raíz del proyecto y devuelve [código, salida]. */
-function correr(array $cmd, array $env = []): array {
+/**
+ * Ejecuta un comando en la raíz del proyecto y devuelve [código, salida].
+ * Lee salida y errores a la vez para que un comando hablador no se quede trabado.
+ */
+function correr(array $cmd, array $env = [], int $limite = 180): array {
     if (!shell_disponible()) return [127, 'El hosting no permite ejecutar comandos (proc_open deshabilitado).'];
-    $desc = [1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
-    $entorno = array_merge($_ENV, ['HOME' => sys_get_temp_dir(), 'GIT_TERMINAL_PROMPT' => '0'], $env);
+    @set_time_limit($limite + 30);
+
+    $desc    = [1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
+    $entorno = array_merge($_ENV, [
+        'HOME'                => sys_get_temp_dir(),
+        'GIT_TERMINAL_PROMPT' => '0',
+        'GIT_ASKPASS'         => 'echo',
+        'GIT_CONFIG_NOSYSTEM' => '1',
+    ], $env);
+
     $p = @proc_open($cmd, $desc, $tub, RAIZ, $entorno);
     if (!is_resource($p)) return [127, 'No se pudo iniciar el comando.'];
-    $out = stream_get_contents($tub[1]) . stream_get_contents($tub[2]);
-    fclose($tub[1]); fclose($tub[2]);
+
+    stream_set_blocking($tub[1], false);
+    stream_set_blocking($tub[2], false);
+
+    $out    = '';
+    $inicio = time();
+    while (true) {
+        $leer = [$tub[1], $tub[2]];
+        $esc = $exc = null;
+        if (@stream_select($leer, $esc, $exc, 1) > 0) {
+            foreach ($leer as $h) $out .= (string)fread($h, 16384);
+        }
+        $estado = proc_get_status($p);
+        if (!$estado['running']) break;
+        if (time() - $inicio > $limite) {
+            proc_terminate($p, 9);
+            $out .= "\n[El comando superó los {$limite} segundos y se detuvo.]";
+            break;
+        }
+    }
+    foreach ([$tub[1], $tub[2]] as $h) {
+        while (($b = fread($h, 16384)) !== '' && $b !== false) $out .= $b;
+        fclose($h);
+    }
     $cod = proc_close($p);
+    if (isset($estado) && !$estado['running'] && $estado['exitcode'] >= 0) $cod = $estado['exitcode'];
     return [$cod, trim($out)];
 }
 

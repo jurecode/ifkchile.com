@@ -13,8 +13,11 @@ if ($accion === 'git_estado') {
         $aviso = ['tipo' => 'error', 'texto' => 'Git no está disponible en este servidor.'];
     } else {
         $lineas = [];
+        $lineas[] = 'Carpeta: ' . RAIZ;
         if (!es_repo()) {
-            $lineas[] = '· Esta carpeta todavía no es un repositorio git.';
+            $lineas[] = '';
+            $lineas[] = 'Esta carpeta todavía no está conectada con GitHub.';
+            $lineas[] = 'Completa los datos de arriba y usa el botón "Conectar con GitHub".';
         } else {
             [, $rama]   = correr(['git', 'rev-parse', '--abbrev-ref', 'HEAD']);
             [, $ultimo] = correr(['git', 'log', '-1', '--pretty=%h · %s · %cr']);
@@ -40,11 +43,9 @@ if ($accion === 'git_subir') {
     elseif (trim($g['repo']) === '') $error = 'Falta la dirección del repositorio.';
     elseif (trim($g['token']) === '')$error = 'Falta el token de GitHub.';
 
+    elseif (!es_repo())              $error = 'Esta carpeta no está conectada con GitHub. Usa primero el botón "Conectar con GitHub".';
+
     if (!$error) {
-        if (!es_repo()) {
-            [$c, $o] = correr(['git', 'init', '-b', $g['rama'] ?: 'main']);
-            $salida[] = "$ git init\n$o";
-        }
         correr(['git', 'config', 'user.name',  $g['usuario'] ?: 'IFK Panel']);
         correr(['git', 'config', 'user.email', $SITE['email']]);
 
@@ -72,5 +73,56 @@ if ($accion === 'git_subir') {
     if ($error) {
         $aviso = ['tipo' => 'error', 'texto' => $error, 'consola' => implode("\n\n", $salida)];
         panel_log('github', 'error: ' . $error);
+    }
+}
+
+/* --- Conectar esta carpeta con el repositorio de GitHub --- */
+if ($accion === 'git_conectar') {
+    $salida = [];
+    $error  = null;
+    $rama   = $g['rama'] ?: 'main';
+
+    if (!git_disponible())            $error = 'Git no está disponible en este servidor.';
+    elseif (trim($g['repo']) === '')  $error = 'Falta la dirección del repositorio.';
+    elseif (trim($g['token']) === '') $error = 'Falta el token de GitHub.';
+
+    if (!$error) {
+        if (!es_repo()) {
+            [$c, $o] = correr(['git', 'init', '-b', $rama]);
+            $salida[] = "$ git init\n" . ($o ?: 'ok');
+            if ($c !== 0) $error = 'No se pudo iniciar el repositorio local.';
+        }
+    }
+
+    if (!$error) {
+        /* El remoto se guarda sin credenciales; el token se usa sólo al momento de conectar o subir */
+        $limpia = 'https://' . preg_replace('#^[^@]*@#', '', preg_replace('#^https?://#', '', trim($g['repo'])));
+        correr(['git', 'remote', 'remove', 'origin']);
+        [$c, $o] = correr(['git', 'remote', 'add', 'origin', $limpia]);
+        $salida[] = "$ git remote add origin " . $limpia . "\n" . ($o ?: 'ok');
+
+        [$c, $o] = correr(['git', 'fetch', git_url_push($g), $rama]);
+        $salida[] = "$ git fetch origin " . $rama . "\n" . ocultar_token($o, $g['token']);
+        if ($c !== 0) {
+            $error = 'No se pudo leer el repositorio. Revisa la dirección, la rama y el token.';
+        } else {
+            /* --mixed: deja los archivos intactos y sólo alinea el historial */
+            [$c, $o] = correr(['git', 'reset', '--mixed', 'FETCH_HEAD']);
+            $salida[] = "$ git reset --mixed FETCH_HEAD\n" . ($o ?: 'ok');
+
+            [, $estado] = correr(['git', 'status', '--porcelain']);
+            $pend = $estado === '' ? 0 : count(explode("\n", $estado));
+            $salida[] = 'Carpeta conectada. Diferencias con GitHub: ' . $pend;
+
+            $aviso = ['tipo' => 'ok',
+                'texto'   => 'Carpeta conectada con GitHub.' . ($pend ? ' Hay ' . $pend . ' archivo(s) con diferencias listos para subir.' : ' No hay diferencias.'),
+                'consola' => implode("\n\n", $salida)];
+            panel_log('github', 'carpeta conectada a ' . $g['repo']);
+        }
+    }
+
+    if ($error) {
+        $aviso = ['tipo' => 'error', 'texto' => $error, 'consola' => implode("\n\n", $salida)];
+        panel_log('github', 'error al conectar: ' . $error);
     }
 }

@@ -43,6 +43,21 @@ $colaTok = $token !== '' ? '•••• ' . substr($token, -4) : '';
   </form>
 </div>
 
+<?php if (!$repoOk): ?>
+<div class="tarjeta">
+  <h2>Conectar la carpeta</h2>
+  <p class="intro">
+    Esta carpeta todavía no está enlazada con el repositorio. Al conectarla se enlaza con GitHub
+    <strong>sin tocar tus archivos</strong>: sólo queda claro qué está subido y qué no.
+  </p>
+  <form method="post" action="index.php?v=repositorio">
+    <input type="hidden" name="csrf" value="<?= e(csrf()) ?>">
+    <input type="hidden" name="accion" value="git_conectar">
+    <button class="btn btn--osc" type="submit" <?= $hayGit ? '' : 'disabled' ?>>Conectar con GitHub</button>
+  </form>
+</div>
+<?php endif; ?>
+
 <div class="tarjeta">
   <h2>Subir cambios</h2>
 
@@ -51,7 +66,8 @@ $colaTok = $token !== '' ? '•••• ' . substr($token, -4) : '';
   <?php endif; ?>
 
   <p class="intro">
-    Guarda todos los cambios de esta carpeta en un commit y los sube al repositorio<?= $repoOk ? '' : ' (la primera vez también crea el repositorio local)' ?>.
+    Guarda todos los cambios de esta carpeta en un commit y los sube al repositorio.
+    <?= $repoOk ? '' : ' Primero hay que conectar la carpeta.' ?>
   </p>
 
   <form method="post" action="index.php?v=repositorio" onsubmit="return confirm('¿Subir todos los cambios actuales a GitHub?')">
@@ -63,7 +79,7 @@ $colaTok = $token !== '' ? '•••• ' . substr($token, -4) : '';
         <input id="mensaje" name="mensaje" type="text" placeholder="Ej: fotos nuevas de proyectos">
       </div>
     </div>
-    <button class="btn" type="submit" <?= $hayGit ? '' : 'disabled' ?>>Subir a GitHub</button>
+    <button class="btn" type="submit" <?= ($hayGit && $repoOk) ? '' : 'disabled' ?>>Subir a GitHub</button>
   </form>
 </div>
 
