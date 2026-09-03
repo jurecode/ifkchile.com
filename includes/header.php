@@ -61,7 +61,10 @@ $solida = !empty($NAV_SOLIDA);
       <a class="menu__cta" href="<?= e(wa_link()) ?>" target="_blank" rel="noopener">WhatsApp</a>
     </nav>
 
-    <a class="btn btn--ghost nav__cta" href="<?= url('contacto') ?>">Cotizar</a>
+    <a class="btn btn--cta nav__cta" href="<?= url('contacto') ?>">
+      <span>Cotizar</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13m0 0-5-5m5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
 
     <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu">
       <span></span><span></span><span></span>

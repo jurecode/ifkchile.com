@@ -74,6 +74,17 @@ button,input,select,textarea{font:inherit;color:inherit}
 .btn--ghost{background:rgba(255,255,255,.13);color:#fff;border-color:rgba(255,255,255,.4);backdrop-filter:blur(6px)}
 .btn--ghost:hover{background:#fff;color:var(--navy-800);border-color:#fff}
 .btn--wa{background:var(--wa);color:#fff;box-shadow:0 8px 22px rgba(34,164,93,.26)}
+.btn--cta{position:relative;overflow:hidden;color:#fff;border:0;font-weight:800;letter-spacing:.015em;
+  background:linear-gradient(135deg,var(--blue-400),var(--blue-500));
+  box-shadow:0 6px 20px rgba(61,120,196,.45),inset 0 1px 0 rgba(255,255,255,.28)}
+.btn--cta svg{width:17px;height:17px;transition:transform .25s ease}
+.btn--cta::after{content:'';position:absolute;top:0;left:-70%;width:45%;height:100%;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.38),transparent);
+  transform:skewX(-20deg);transition:left .6s ease}
+.btn--cta:hover{background:linear-gradient(135deg,#6ea9ea,#4a86d4);
+  box-shadow:0 12px 28px rgba(61,120,196,.55),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn--cta:hover::after{left:120%}
+.btn--cta:hover svg{transform:translateX(3px)}
 .btn--wa:hover{background:#1c8b4e}
 .btn--wide{width:100%;padding:17px 26px;margin-top:8px}
 
@@ -107,8 +118,7 @@ body.nav-stuck .menu a.is-active,body.nav-solida .menu a.is-active{background:va
 .menu__cta{display:none}
 
 .nav__cta{flex:none;padding:12px 24px;font-size:.88rem;border-radius:var(--r-md)}
-body.nav-stuck .nav__cta,body.nav-solida .nav__cta{background:var(--navy-800);color:#fff;border-color:var(--navy-800)}
-body.nav-stuck .nav__cta:hover,body.nav-solida .nav__cta:hover{background:var(--blue-500);border-color:var(--blue-500)}
+body.nav-stuck .nav__cta,body.nav-solida .nav__cta{box-shadow:0 6px 18px rgba(61,120,196,.35),inset 0 1px 0 rgba(255,255,255,.28)}
 
 .burger{display:none;width:46px;height:46px;border:0;background:rgba(255,255,255,.12);border-radius:var(--r-md);
   flex-direction:column;justify-content:center;gap:5px;cursor:pointer;padding:0}
