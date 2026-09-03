@@ -16,7 +16,7 @@ La primera vez que entras, el panel te pide **crear una clave** (mínimo 8 carac
 | Sección | Qué permite |
 |---|---|
 | **Estado del sitio** | Cambiar entre **Publicado** y **Próximamente**, y la clave de previsualización. |
-| **Imágenes** | Reemplazar cualquier foto del sitio (y el logotipo). Se recorta y optimiza sola a la medida correcta; la versión anterior queda respaldada. |
+| **Imágenes** | Reemplazar cualquier foto del sitio (y el logotipo) **arrastrándola sobre la tarjeta** o con un clic. Se recorta y optimiza sola a la medida correcta, se ve al instante y la versión anterior queda respaldada. |
 | **Repositorio** | Guardar la conexión con GitHub (repositorio, rama, usuario y token) y subir los cambios. |
 | **Clave de acceso** | Cambiar la clave del panel. |
 

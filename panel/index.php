@@ -64,7 +64,9 @@ if (!panel_autenticado()) {
 
 /* ---------- Acciones (todas requieren POST + CSRF) ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $esAjax = ($_POST['ajax'] ?? '') === '1';
     if (!csrf_ok()) {
+        if ($esAjax) responder_json(false, 'La sesión expiró. Recarga la página.');
         $aviso = ['tipo' => 'error', 'texto' => 'La sesión expiró. Vuelve a intentarlo.'];
     } else {
         $accion = $_POST['accion'] ?? '';
@@ -83,9 +85,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         /* --- Imágenes --- */
         if ($accion === 'imagen') {
-            [$ok, $msg] = panel_guardar_imagen((string)($_POST['clave'] ?? ''), $_FILES['archivo'] ?? []);
-            $aviso = ['tipo' => $ok ? 'ok' : 'error', 'texto' => $msg];
+            $clave = (string)($_POST['clave'] ?? '');
+            [$ok, $msg] = panel_guardar_imagen($clave, $_FILES['archivo'] ?? []);
             $AJ = ajustes(true);
+            if ($esAjax) responder_json($ok, $msg, $ok ? $clave : '');
+            $aviso = ['tipo' => $ok ? 'ok' : 'error', 'texto' => $msg];
         }
 
         /* --- Datos del repositorio --- */

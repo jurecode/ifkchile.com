@@ -57,5 +57,6 @@
     <?php require __DIR__ . '/' . $vista . '.php'; ?>
   </main>
 </div>
+<script src="/panel/assets/panel.js?v=<?= @filemtime(__DIR__ . '/../assets/panel.js') ?>" defer></script>
 </body>
 </html>

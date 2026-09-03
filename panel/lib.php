@@ -144,7 +144,6 @@ function panel_guardar_imagen(string $clave, array $file): array {
         imagefill($fondo, 0, 0, imagecolorallocate($fondo, 255, 255, 255));
         imagecopy($fondo, $im, 0, 0, 0, 0, imagesx($im), imagesy($im));
         $ok = imagejpeg($fondo, $destino, 82);
-        imagedestroy($fondo);
     } elseif ($extDest === 'png') {
         imagealphablending($im, false); imagesavealpha($im, true);
         $ok = imagepng($im, $destino, 8);
@@ -156,7 +155,6 @@ function panel_guardar_imagen(string $clave, array $file): array {
         imagealphablending($im, false); imagesavealpha($im, true);
         $ok = imagepng($im, RAIZ . '/' . $rutaFinal, 8);
     }
-    imagedestroy($im);
     if (!$ok) return [false, 'No se pudo guardar la imagen.'];
 
     $aj = ajustes();
@@ -174,7 +172,6 @@ function panel_recortar($im, int $W, int $H) {
     $out = imagecreatetruecolor($W, $H);
     imagealphablending($out, false); imagesavealpha($out, true);
     imagecopyresampled($out, $im, 0, 0, $x, $y, $W, $H, $nw, $nh);
-    imagedestroy($im);
     return $out;
 }
 
@@ -186,8 +183,21 @@ function panel_limitar($im, int $maxW, int $maxH) {
     $out = imagecreatetruecolor($W, $H);
     imagealphablending($out, false); imagesavealpha($out, true);
     imagecopyresampled($out, $im, 0, 0, 0, 0, $W, $H, $w, $h);
-    imagedestroy($im);
     return $out;
+}
+
+/** Respuesta JSON para las subidas hechas desde el navegador (arrastrar y soltar). */
+function responder_json(bool $ok, string $msg, string $clave = ''): void {
+    $datos = ['ok' => $ok, 'msg' => $msg];
+    if ($clave !== '') {
+        $ruta = RAIZ . '/' . img_ruta($clave);
+        $datos['src']  = img_src($clave);
+        $datos['peso'] = is_file($ruta) ? round(filesize($ruta) / 1024) . ' KB' : '';
+    }
+    while (ob_get_level() > 0) { ob_end_clean(); }   // descarta avisos sueltos del hosting
+    if (!headers_sent()) header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($datos, JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 /* ---------------- Ejecución de comandos ---------------- */
