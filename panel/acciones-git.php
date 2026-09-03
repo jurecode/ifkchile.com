@@ -213,7 +213,17 @@ if ($accion === 'git_forzar') {
     }
 
     if (!$error) {
-        /* Respaldo: el estado actual queda guardado en una rama local recuperable */
+        /* Respaldo completo: primero se comitea lo que esté suelto (fotos subidas
+           desde el panel, por ejemplo) y recién después se guarda la rama. */
+        [, $sucio] = correr(['git', 'status', '--porcelain']);
+        if ($sucio !== '') {
+            correr(['git', 'config', 'user.name',  $g['usuario'] ?: 'IFK Panel']);
+            correr(['git', 'config', 'user.email', $SITE['email']]);
+            correr(['git', 'add', '-A']);
+            [$c, $o] = correr(['git', 'commit', '-m', 'Respaldo automático antes de alinear con GitHub']);
+            $salida[] = "$ git commit (respaldo de los cambios sueltos)\n" . $o;
+        }
+
         $respaldo = 'respaldo-' . date('Ymd-Hi');
         [$c, $o] = correr(['git', 'branch', '-f', $respaldo, 'HEAD']);
         $salida[] = '$ git branch ' . $respaldo . "\n" . ($o ?: 'ok');
