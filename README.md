@@ -17,7 +17,7 @@ La primera vez que entras, el panel te pide **crear una clave** (mínimo 8 carac
 |---|---|
 | **Estado del sitio** | Cambiar entre **Publicado** y **Próximamente**, y la clave de previsualización. |
 | **Imágenes** | Reemplazar cualquier foto del sitio (y el logotipo). Se recorta y optimiza sola a la medida correcta; la versión anterior queda respaldada. |
-| **Repositorio** | Guardar el token de GitHub y publicar: *local → GitHub* y *GitHub → servidor*. |
+| **Repositorio** | Guardar la conexión con GitHub (repositorio, rama, usuario y token) y subir los cambios. |
 | **Clave de acceso** | Cambiar la clave del panel. |
 
 Todo queda registrado en `storage/panel.log` y visible en el panel.
@@ -34,52 +34,33 @@ La clave se cambia desde el panel.
 
 ---
 
-## 2. Publicar cambios (local → GitHub → servidor)
+## 2. Subir cambios a GitHub
 
 Configuración, una sola vez:
 
 1. Crea el repositorio en GitHub (puede ser privado).
 2. En GitHub → *Settings* → *Developer settings* → *Personal access tokens*, genera un token con permiso **repo**
    (o *Contents: read and write* si es de tipo *fine-grained*).
-3. En el panel → **Repositorio**, pega la dirección (`github.com/usuario/repositorio.git`), el usuario y el token, y guarda.
-4. En el servidor, crea el archivo `storage/deploy.json`:
+3. En el panel → **Repositorio**, pega la dirección (`github.com/usuario/repositorio.git`), la rama, el usuario y el
+   token, y guarda.
 
-   ```json
-   {"clave":"una-clave-larga-e-inventada","repo":"jurecode/ifkchile.com","rama":"main","usuario":"jurecode","token":"ghp_…"}
-   ```
-
-   `usuario` y `token` sólo hacen falta si el repositorio es privado. Escribe esa misma clave y la URL
-   `https://ifkchile.com/deploy.php` en el panel. Va en `storage/` a propósito: esa carpeta no viaja en el
-   repositorio, así la configuración del servidor sobrevive a cada actualización.
-
-5. En el servidor la carpeta puede ser un clon de git **o** una copia subida por FTP: `deploy.php` detecta
-   cuál es y usa el método que corresponda (ver abajo).
-Después, cada actualización son dos botones:
-
-- **Subir a GitHub** — hace `add` + `commit` + `push` de todo lo que cambió en esta carpeta.
-- **Actualizar servidor** — le pide al servidor que descargue la última versión.
+Después, el botón **Subir a GitHub** hace `add` + `commit` + `push` de todo lo que cambió en la carpeta, y
+**Ver estado** muestra la rama, el último commit y lo que falta por subir.
 
 Notas:
 
 - El token nunca se guarda dentro del repositorio ni se muestra completo: vive en `storage/settings.json`,
   carpeta bloqueada por `.htaccess` y excluida del repositorio (`.gitignore`).
-- `storage/` no viaja a GitHub, así que **el estado publicado/próximamente es propio de cada instalación**:
-  para publicar el sitio real se cambia desde el panel del servidor (`ifkchile.com/panel/`).
-- **`deploy.php` funciona de dos formas.** Si la carpeta del servidor es un clon de git y el hosting permite ejecutar
-  comandos, hace `fetch` + `reset --hard`. Si no —hosting compartido, sitio subido por FTP— descarga el ZIP del
-  repositorio desde GitHub y reemplaza los archivos, sin necesitar git. En ese segundo modo, los archivos que se
-  **eliminen** del repositorio hay que borrarlos a mano en el servidor.
-- El botón *Subir a GitHub* del panel sí necesita `git` y `proc_open` en la máquina donde corre el panel. Si el hosting
-  los bloquea, se sube desde tu computador y el servidor se actualiza igual con el botón *Actualizar servidor*.
-
----
+- El botón necesita `git` y `proc_open` en la máquina donde corre el panel. Si el hosting los bloquea, se sube
+  desde tu computador con `git push`.
+- `storage/` no viaja a GitHub, así que **el estado publicado/próximamente es propio de cada instalación**.
+- La actualización del servidor se hace por FTP o `git pull`, según cómo tengas montado el hosting.
 
 ## 3. Estructura de archivos
 
 ```
 index.php              Front controller (ruteo + modo Próximamente)
 config.php             Datos de la empresa, ajustes y slots de imágenes
-deploy.php             Se sube al servidor: actualiza el sitio desde GitHub
 includes/
   data.php             Áreas, marcas, proyectos, valores y menú  ← contenido editable
   header.php           Navegación + SEO + datos estructurados

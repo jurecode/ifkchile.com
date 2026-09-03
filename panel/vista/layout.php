@@ -2,7 +2,7 @@
 <?php $secciones = [
   'estado'      => ['Estado del sitio', 'Publicado o "Próximamente"'],
   'imagenes'    => ['Imágenes',         'Fotos del sitio'],
-  'repositorio' => ['Repositorio',      'GitHub y servidor'],
+  'repositorio' => ['Repositorio',      'Conexión con GitHub'],
   'clave'       => ['Clave de acceso',  'Seguridad del panel'],
 ]; ?>
 <!DOCTYPE html>

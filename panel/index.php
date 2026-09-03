@@ -93,8 +93,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $g['repo']         = trim((string)($_POST['repo'] ?? ''));
             $g['rama']         = trim((string)($_POST['rama'] ?? 'main')) ?: 'main';
             $g['usuario']      = trim((string)($_POST['usuario'] ?? ''));
-            $g['deploy_url']   = trim((string)($_POST['deploy_url'] ?? ''));
-            $g['deploy_clave'] = trim((string)($_POST['deploy_clave'] ?? ''));
             $tokenNuevo        = trim((string)($_POST['token'] ?? ''));
             if ($tokenNuevo !== '') $g['token'] = $tokenNuevo;
             if (!empty($_POST['borrar_token'])) $g['token'] = '';
@@ -105,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         /* --- Acciones de repositorio --- */
-        if (in_array($accion, ['git_estado', 'git_subir', 'git_desplegar'], true)) {
+        if (in_array($accion, ['git_estado', 'git_subir'], true)) {
             require __DIR__ . '/acciones-git.php';
         }
 

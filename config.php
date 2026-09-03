@@ -19,10 +19,7 @@ function ajustes_defecto(): array {
         'preview_key'   => 'ifk2026',
         'password_hash' => '',
         'imagenes'      => [],   // clave => ruta relativa (si se cambió la extensión)
-        'git'           => [
-            'repo' => '', 'rama' => 'main', 'usuario' => '', 'token' => '',
-            'deploy_url' => '', 'deploy_clave' => '',
-        ],
+        'git'           => ['repo' => '', 'rama' => 'main', 'usuario' => '', 'token' => ''],
         'actualizado'   => '',
     ];
 }

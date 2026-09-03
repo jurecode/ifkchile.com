@@ -74,37 +74,3 @@ if ($accion === 'git_subir') {
         panel_log('github', 'error: ' . $error);
     }
 }
-
-/* --- Actualizar el servidor (llama a deploy.php en el hosting) --- */
-if ($accion === 'git_desplegar') {
-    $url   = trim($g['deploy_url']);
-    $clave = trim($g['deploy_clave']);
-    if ($url === '' || $clave === '') {
-        $aviso = ['tipo' => 'error', 'texto' => 'Falta la dirección de deploy.php o su clave.'];
-    } else {
-        $destino = $url . (str_contains($url, '?') ? '&' : '?') . 'clave=' . rawurlencode($clave);
-        $resp = null; $cod = 0;
-        if (function_exists('curl_init')) {
-            $ch = curl_init($destino);
-            curl_setopt_array($ch, [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT        => 120,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_USERAGENT      => 'IFK-Panel',
-            ]);
-            $resp = curl_exec($ch);
-            $cod  = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            if ($resp === false) $resp = 'Error de conexión: ' . curl_error($ch);
-            curl_close($ch);
-        } else {
-            $resp = @file_get_contents($destino);
-            $cod  = $resp === false ? 0 : 200;
-            if ($resp === false) $resp = 'No se pudo conectar con el servidor.';
-        }
-        $ok = ($cod >= 200 && $cod < 300);
-        $aviso = ['tipo' => $ok ? 'ok' : 'error',
-            'texto'   => $ok ? 'El servidor actualizó su copia del repositorio.' : 'El servidor respondió con un error (HTTP ' . $cod . ').',
-            'consola' => ocultar_token((string)$resp, $clave)];
-        panel_log('servidor', 'deploy HTTP ' . $cod);
-    }
-}
