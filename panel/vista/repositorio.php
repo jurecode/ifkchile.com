@@ -94,6 +94,20 @@ $colaTok = $token !== '' ? '•••• ' . substr($token, -4) : '';
     <input type="hidden" name="accion" value="git_traer">
     <button class="btn btn--osc" type="submit" <?= ($hayGit && $repoOk) ? '' : 'disabled' ?>>Traer cambios</button>
   </form>
+
+  <details class="rescate">
+    <summary>El historial se separó y no puede actualizarse solo</summary>
+    <p>
+      Pasa cuando esta carpeta y GitHub siguieron caminos distintos (por ejemplo, si se subieron archivos por FTP
+      y además se hizo un commit aquí). Este botón deja la carpeta <strong>exactamente igual a GitHub</strong>.
+      Antes de hacerlo guarda el estado actual en una rama local, así nada se pierde de forma definitiva.
+    </p>
+    <form method="post" action="index.php?v=repositorio" onsubmit="return confirm('La carpeta quedará igual a GitHub y se descartarán los cambios locales (se guarda un respaldo). ¿Continuar?')">
+      <input type="hidden" name="csrf" value="<?= e(csrf()) ?>">
+      <input type="hidden" name="accion" value="git_forzar">
+      <button class="btn btn--alerta" type="submit" <?= ($hayGit && $repoOk) ? '' : 'disabled' ?>>Usar la versión de GitHub</button>
+    </form>
+  </details>
 </div>
 
 <div class="tarjeta">

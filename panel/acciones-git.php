@@ -45,6 +45,19 @@ if ($accion === 'git_subir') {
 
     elseif (!es_repo())              $error = 'Esta carpeta no está conectada con GitHub. Usa primero el botón "Conectar con GitHub".';
 
+    /* Si GitHub tiene commits que aquí no están, el push se rechazaría y quedarían
+       dos historias distintas: mejor detenerse antes de crear el commit. */
+    if (!$error) {
+        [$c, $o] = correr(['git', 'fetch', git_url_push($g), $g['rama'] ?: 'main']);
+        if ($c === 0) {
+            [, $atras] = correr(['git', 'rev-list', '--count', 'HEAD..FETCH_HEAD']);
+            if ((int)trim($atras) > 0) {
+                $error = 'GitHub tiene ' . (int)trim($atras) . ' cambio(s) más nuevos que esta carpeta. '
+                       . 'Usa primero "Traer cambios" y vuelve a intentarlo.';
+            }
+        }
+    }
+
     if (!$error) {
         correr(['git', 'config', 'user.name',  $g['usuario'] ?: 'IFK Panel']);
         correr(['git', 'config', 'user.email', $SITE['email']]);
@@ -163,7 +176,8 @@ if ($accion === 'git_traer') {
                 [$c, $o] = correr(['git', 'merge', '--ff-only', 'FETCH_HEAD']);
                 $salida[] = "$ git merge --ff-only\n" . ($o ?: 'ok');
                 if ($c !== 0) {
-                    $error = 'El historial de esta carpeta se separó del de GitHub, así que no se pudo actualizar sola.';
+                    $error = 'El historial de esta carpeta se separó del de GitHub. '
+                           . 'Puedes dejarla igual a GitHub con el botón "Usar la versión de GitHub" (se guarda un respaldo antes).';
                 } else {
                     [, $head] = correr(['git', 'log', '-1', '--pretty=%h · %s']);
                     $salida[] = 'Versión actual: ' . $head;
@@ -179,5 +193,47 @@ if ($accion === 'git_traer') {
     if ($error) {
         $aviso = ['tipo' => 'error', 'texto' => $error, 'consola' => implode("\n\n", $salida)];
         panel_log('github', 'error al traer: ' . $error);
+    }
+}
+
+/* --- Dejar la carpeta igual a GitHub, guardando antes un respaldo --- */
+if ($accion === 'git_forzar') {
+    $salida = [];
+    $error  = null;
+    $rama   = $g['rama'] ?: 'main';
+
+    if (!git_disponible())            $error = 'Git no está disponible en este servidor.';
+    elseif (!es_repo())               $error = 'Esta carpeta no está conectada con GitHub.';
+    elseif (trim($g['token']) === '') $error = 'Falta el token de GitHub.';
+
+    if (!$error) {
+        [$c, $o] = correr(['git', 'fetch', git_url_push($g), $rama]);
+        $salida[] = "$ git fetch origin " . $rama . "\n" . (ocultar_token($o, $g['token']) ?: 'ok');
+        if ($c !== 0) $error = 'No se pudo leer el repositorio. Revisa la dirección, la rama y el token.';
+    }
+
+    if (!$error) {
+        /* Respaldo: el estado actual queda guardado en una rama local recuperable */
+        $respaldo = 'respaldo-' . date('Ymd-Hi');
+        [$c, $o] = correr(['git', 'branch', '-f', $respaldo, 'HEAD']);
+        $salida[] = '$ git branch ' . $respaldo . "\n" . ($o ?: 'ok');
+
+        [$c, $o] = correr(['git', 'reset', '--hard', 'FETCH_HEAD']);
+        $salida[] = "$ git reset --hard FETCH_HEAD\n" . ($o ?: 'ok');
+        if ($c !== 0) {
+            $error = 'No se pudo alinear la carpeta con GitHub.';
+        } else {
+            [, $head] = correr(['git', 'log', '-1', '--pretty=%h · %s']);
+            $salida[] = 'Versión actual: ' . $head;
+            $aviso = ['tipo' => 'ok',
+                'texto'   => 'La carpeta quedó igual a GitHub. Lo que había antes se guardó en la rama local "' . $respaldo . '".',
+                'consola' => implode("\n\n", $salida)];
+            panel_log('github', 'reset duro a GitHub · respaldo en ' . $respaldo);
+        }
+    }
+
+    if ($error) {
+        $aviso = ['tipo' => 'error', 'texto' => $error, 'consola' => implode("\n\n", $salida)];
+        panel_log('github', 'error al forzar: ' . $error);
     }
 }
