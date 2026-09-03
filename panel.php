@@ -16,6 +16,13 @@ declare(strict_types=1);
 define('RAIZ', __DIR__);
 
 $CFG = is_file(RAIZ . '/config.php') ? require RAIZ . '/config.php' : null;
+if (!is_array($CFG)) {
+    $CFG = null;
+} else {
+    /* Sólo el token y la clave son obligatorios; el resto tiene valor por defecto. */
+    $CFG += ['token' => '', 'repo' => '', 'rama' => 'main', 'clave' => ''];
+    if (trim((string)$CFG['rama']) === '') $CFG['rama'] = 'main';
+}
 
 session_name('panel');
 session_start([
@@ -50,15 +57,86 @@ function git(array $args): array {
 function hay_git(): bool { return git(['--version'])[0] === 0; }
 function es_repo(): bool { return is_dir(RAIZ . '/.git'); }
 
+/* ---------------- GitHub ---------------- */
+
+/** Le pregunta algo a GitHub. Devuelve [código HTTP, respuesta]. */
+function api(array $c, string $metodo, string $ruta, ?array $datos = null): array {
+    $url    = 'https://api.github.com' . $ruta;
+    $cuerpo = $datos === null ? null : json_encode($datos, JSON_UNESCAPED_SLASHES);
+    $cab    = [
+        'Accept: application/vnd.github+json',
+        'Authorization: Bearer ' . trim((string)$c['token']),
+        'User-Agent: panel-web',
+        'X-GitHub-Api-Version: 2022-11-28',
+        'Content-Type: application/json',
+    ];
+
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST  => $metodo,
+            CURLOPT_HTTPHEADER     => $cab,
+            CURLOPT_TIMEOUT        => 20,
+        ]);
+        if ($cuerpo !== null) curl_setopt($ch, CURLOPT_POSTFIELDS, $cuerpo);
+        $resp = (string)curl_exec($ch);
+        $cod  = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        if (PHP_VERSION_ID < 80000) curl_close($ch);   // en PHP 8 ya no hace falta
+    } else {
+        $ctx  = stream_context_create(['http' => [
+            'method'         => $metodo,
+            'header'         => implode("\r\n", $cab),
+            'content'        => $cuerpo,
+            'ignore_errors'  => true,
+            'timeout'        => 20,
+        ]]);
+        $resp = (string)@file_get_contents($url, false, $ctx);
+        $cod  = 0;
+        foreach ($http_response_header ?? [] as $h) {
+            if (preg_match('#^HTTP/\S+ (\d+)#', $h, $m)) $cod = (int)$m[1];
+        }
+    }
+
+    return [$cod, json_decode($resp, true) ?: []];
+}
+
+/** Quién es el dueño del token. */
+function github_usuario(array $c): string {
+    static $u = null;
+    if ($u !== null) return $u;
+    [$cod, $d] = api($c, 'GET', '/user');
+    return $u = ($cod === 200 && !empty($d['login'])) ? (string)$d['login'] : '';
+}
+
+/** "usuario/proyecto", sacado de config.php o, si va vacío, del propio dominio. */
+function repo_nombre(array $c): string {
+    static $n = null;
+    if ($n !== null) return $n;
+
+    $r = trim((string)($c['repo'] ?? ''));
+    if ($r === '') {
+        $r = preg_replace('/:\d+$/', '', strtolower((string)($_SERVER['HTTP_HOST'] ?? '')));
+        $r = preg_replace('/^www\./', '', (string)$r);
+    }
+    $r = preg_replace('#^(https?://)?([^@/]*@)?github\.com/#i', '', $r);
+    $r = preg_replace('#\.git$#i', '', rtrim((string)$r, '/'));
+    if (!str_contains((string)$r, '/')) {
+        $duenio = github_usuario($c);
+        $r = ($duenio !== '' ? $duenio . '/' : '') . $r;
+    }
+    return $n = (string)$r;
+}
+
 /** Dirección del repositorio sin usuario ni contraseña. */
 function url_limpia(array $c): string {
-    return 'https://' . preg_replace('#^(https?://)?([^@/]*@)?#', '', trim((string)$c['repo']));
+    return 'https://github.com/' . repo_nombre($c) . '.git';
 }
 
 /** La misma dirección, pero con el token para poder subir o bajar. */
 function url_token(array $c): string {
     return 'https://x-access-token:' . rawurlencode(trim((string)$c['token']))
-         . '@' . preg_replace('#^(https?://)?([^@/]*@)?#', '', trim((string)$c['repo']));
+         . '@github.com/' . repo_nombre($c) . '.git';
 }
 
 /** El token nunca se muestra en pantalla. */
@@ -248,17 +326,67 @@ function palabra_traer(array $c, string $modo = ''): array {
 }
 
 function palabra_instalar(array $c): array {
-    preparar($c);
     $log = [];
 
+    $duenio = github_usuario($c);
+    if ($duenio === '') {
+        return [false, 'GitHub no contestó quién eres: revisa el token, o que este servidor tenga salida a internet.', ''];
+    }
+    $nombre = repo_nombre($c);
+    if (!str_contains($nombre, '/') || str_ends_with($nombre, '/')) {
+        return [false, 'No sé cómo se llama el repositorio. Escríbelo en config.php, en "repo".', ''];
+    }
+    $log[] = 'Cuenta:      ' . $duenio . "\nRepositorio: " . $nombre;
+
+    /* ¿Existe ya en GitHub? Si no, se crea. */
+    [$cod] = api($c, 'GET', '/repos/' . $nombre);
+    $vacio = false;
+
+    if ($cod === 404) {
+        [$owner, $corto] = array_pad(explode('/', $nombre, 2), 2, '');
+        if ($owner !== $duenio) {
+            return [false, 'El repositorio ' . $nombre . ' no existe, y no lo puedo crear porque no es tu cuenta.', implode("\n\n", $log)];
+        }
+        [$cod2, $d] = api($c, 'POST', '/user/repos', [
+            'name' => $corto, 'private' => true, 'description' => 'Sitio ' . $corto,
+        ]);
+        if ($cod2 !== 201) {
+            $m = $d['errors'][0]['message'] ?? $d['message'] ?? ('GitHub contestó ' . $cod2);
+            return [false, 'No pude crear el repositorio: ' . $m, implode("\n\n", $log)];
+        }
+        $log[] = 'Repositorio creado en GitHub, privado.';
+        $vacio = true;
+    } elseif ($cod !== 200) {
+        return [false, 'GitHub contestó ' . $cod . ' al buscar ' . $nombre . '. Revisa el token y sus permisos.', implode("\n\n", $log)];
+    } else {
+        [$c2, $ramas] = api($c, 'GET', '/repos/' . $nombre . '/branches');
+        $vacio = ($c2 === 200 && $ramas === []);
+    }
+
+    preparar($c);
+
+    /* Repositorio nuevo o vacío: se sube el sitio tal como está y queda listo. */
+    if ($vacio) {
+        git(['add', '-A']);
+        [, $sal] = git(['-c', 'user.name=Panel', '-c', 'user.email=panel@localhost',
+                        'commit', '-m', 'Primera subida del sitio ' . date('d-m-Y H:i')]);
+        $log[] = "$ git commit\n" . $sal;
+
+        [$cod, $sal] = git(['push', url_token($c), 'HEAD:refs/heads/' . $c['rama']]);
+        $log[] = "$ git push\n" . (ocultar($sal, $c['token']) ?: 'ok');
+        if ($cod !== 0) {
+            return [false, 'No se pudo subir el sitio. Revisa que el token tenga permiso de escritura.', implode("\n\n", $log)];
+        }
+        return [true, 'Listo: el sitio quedó guardado en GitHub, en ' . $nombre . '.', implode("\n\n", $log)];
+    }
+
+    /* El repositorio ya tiene cosas: se enlaza sin pisar nada de lo que hay aquí. */
     [$cod, $sal] = git(['fetch', url_token($c), $c['rama']]);
     $log[] = "$ git fetch\n" . (ocultar($sal, $c['token']) ?: 'ok');
     if ($cod !== 0) {
         return [false, 'No se pudo leer GitHub. Revisa el token, la dirección y la rama.', implode("\n\n", $log)];
     }
 
-    /* Enlaza la carpeta con GitHub sin tocar ningún archivo: sirve para un
-       sitio que ya estaba funcionando en el servidor. */
     [$cod, $sal] = git(['reset', 'FETCH_HEAD']);
     $log[] = "$ git reset\n" . ($sal ?: 'ok');
     if ($cod !== 0) {
@@ -267,7 +395,14 @@ function palabra_instalar(array $c): array {
 
     /* Lo que está en GitHub y falta aquí sí se baja: no pisa nada, sólo completa. */
     [, $faltan] = git(['ls-files', '--deleted']);
-    $faltan = array_values(array_filter(explode("\n", trim($faltan))));
+    $faltan = array_values(array_filter(explode("\n", trim($faltan)), function (string $f): bool {
+        /* Nunca bajar una portada que tape la que el sitio ya tiene. */
+        if (!preg_match('#^index\.(php|html?)$#i', $f)) return true;
+        foreach (['index.php', 'index.html', 'index.htm'] as $otra) {
+            if (is_file(RAIZ . '/' . $otra)) return false;
+        }
+        return true;
+    }));
     if ($faltan) {
         git(array_merge(['checkout', '--'], $faltan));
         $log[] = 'Se bajaron los que faltaban aquí: ' . implode(', ', $faltan);
@@ -278,7 +413,7 @@ function palabra_instalar(array $c): array {
     $log[] = 'Ojo: al escribir "subir", GitHub queda igual que esta carpeta; lo que borres aquí, se borra allá.';
     if ($sucio !== '') $log[] = $sucio;
 
-    return [true, 'Listo: la carpeta quedó enlazada con GitHub y no se pisó ningún archivo tuyo. '
+    return [true, 'Listo: la carpeta quedó enlazada con ' . $nombre . ' y no se pisó ningún archivo tuyo. '
         . ($n ? 'Hay ' . $n . ' diferencia(s); revísalas abajo y escribe "subir".' : 'Está todo igual que GitHub.'),
         implode("\n\n", $log)];
 }
