@@ -13,6 +13,10 @@
  */
 declare(strict_types=1);
 
+/* En hosting compartido el límite suele ser 30 s y clonar tarda más. */
+@set_time_limit(300);
+@ini_set('max_execution_time', '300');
+
 define('RAIZ', __DIR__);
 
 /** Lee config.php. Devuelve null si todavía no existe. */
@@ -39,18 +43,46 @@ session_start([
 /* Herramientas                                                        */
 /* ------------------------------------------------------------------ */
 
-/** Ejecuta un programa y devuelve [código de salida, salida completa]. */
-function correr(array $args): array {
+/**
+ * Ejecuta un programa y devuelve [código de salida, salida completa].
+ * Lee salida y errores a la vez —si no, un comando hablador puede quedarse
+ * trabado llenando su tubo— y corta solo si algo se cuelga.
+ */
+function correr(array $args, int $tope = 240): array {
     $tubos = [1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
     $env   = ['GIT_TERMINAL_PROMPT' => '0', 'HOME' => RAIZ, 'PATH' => getenv('PATH') ?: '/usr/bin:/bin'];
 
     $proc = @proc_open($args, $tubos, $t, RAIZ, $env);
     if (!is_resource($proc)) return [127, 'No se pudo ejecutar: ' . $args[0]];
 
-    $salida = stream_get_contents($t[1]) . stream_get_contents($t[2]);
-    fclose($t[1]); fclose($t[2]);
+    stream_set_blocking($t[1], false);
+    stream_set_blocking($t[2], false);
 
-    return [proc_close($proc), trim($salida)];
+    $salida = '';
+    $inicio = time();
+    $estado = ['running' => true, 'exitcode' => 1];
+    while (true) {
+        $leer = [$t[1], $t[2]];
+        $escribir = $excepto = null;
+        if (@stream_select($leer, $escribir, $excepto, 1) > 0) {
+            foreach ($leer as $tubo) $salida .= (string)fread($tubo, 16384);
+        }
+        $estado = proc_get_status($proc);
+        if (!$estado['running']) break;
+        if (time() - $inicio > $tope) {
+            proc_terminate($proc, 9);
+            $salida .= "\n[El comando pasó de " . $tope . " segundos y se detuvo.]";
+            break;
+        }
+    }
+    foreach ([$t[1], $t[2]] as $tubo) {
+        while (($resto = fread($tubo, 16384)) !== '' && $resto !== false) $salida .= $resto;
+        fclose($tubo);
+    }
+    $cod = proc_close($proc);
+    if (($estado['exitcode'] ?? -1) >= 0) $cod = $estado['exitcode'];
+
+    return [$cod, trim($salida)];
 }
 
 /** Lo mismo, pero para git y sin que se queje del dueño de la carpeta. */
