@@ -100,11 +100,8 @@ p:last-child{margin-bottom:0}
   border-bottom-color:rgba(255,255,255,.12);
 }
 .nav__in{display:flex;align-items:center;gap:18px;height:var(--nav-h)}
-.nav__logo{
-  display:inline-flex;padding:7px 12px;border-radius:12px;background:rgba(255,255,255,.95);
-  border:1px solid rgba(255,255,255,.6);box-shadow:0 14px 34px -20px rgba(3,16,28,.9);
-}
-.nav__logo img{height:30px;width:auto}
+.nav__logo{display:inline-flex}
+.nav__logo img{height:34px;width:auto;filter:drop-shadow(0 5px 14px rgba(3,16,28,.7))}
 
 .nav__menu{display:flex;align-items:center;gap:4px;margin-left:auto}
 .nav__menu a{
@@ -312,8 +309,8 @@ p:last-child{margin-bottom:0}
 .pie h3{margin:0 0 14px;color:#fff;font-size:.75rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
 .pie a:hover{color:#fff}
 .pie li{margin-bottom:9px;font-size:.92rem}
-.pie__logo{display:inline-flex;padding:9px 14px;border-radius:14px;background:rgba(255,255,255,.95);margin-bottom:16px}
-.pie__logo img{height:34px;width:auto}
+.pie__logo{display:inline-flex;margin-bottom:16px}
+.pie__logo img{height:38px;width:auto}
 .pie__intro{font-size:.92rem;max-width:34ch}
 .pie__abajo{display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;
             margin-top:clamp(30px,4vw,48px);padding-top:22px;border-top:1px solid rgba(255,255,255,.12);
