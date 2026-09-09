@@ -1,6 +1,27 @@
-# Base — reglas mínimas
+# IFK — reglas del servidor
 
 DirectoryIndex index.php
+
+# Todo lo que no sea un archivo de verdad entra por index.php, que decide
+# si el visitante ve la fachada, el mantenimiento o el sitio completo.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Las carpetas internas no se sirven nunca
+  RewriteRule ^(app|datos|vistas)/ - [F,L]
+
+  # Sin barra al final (menos en la raíz): /contacto/ → /contacto
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+  # Imágenes, CSS y demás archivos existentes salen directo
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  RewriteRule ^ index.php [L]
+</IfModule>
 
 # El archivo con el token no se sirve nunca por el navegador
 <FilesMatch "^config(-ejemplo)?\.php$">
@@ -17,4 +38,14 @@ DirectoryIndex index.php
 # Compresión
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/css text/plain application/javascript image/svg+xml application/json
+</IfModule>
+
+# Las imágenes y el CSS llevan ?v=fecha en la dirección, así que se pueden
+# guardar mucho tiempo: al cambiarlas, cambia la dirección.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpeg  "access plus 6 months"
+  ExpiresByType image/webp  "access plus 6 months"
+  ExpiresByType image/svg+xml "access plus 6 months"
+  ExpiresByType text/css    "access plus 6 months"
 </IfModule>

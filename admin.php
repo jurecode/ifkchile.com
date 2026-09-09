@@ -1,6 +1,9 @@
 <?php
 /**
- * Panel — una sola página y una sola caja.
+ * Panel de administración (se entra por /admin).
+ *
+ * Dos cosas en una página: el estado del sitio (Coming Soon, Publicado o
+ * Mantenimiento) y una caja donde se escribe una palabra.
  * Escribes una palabra y se ejecuta:
  *
  *   estado   → cómo está la carpeta y qué falta por subir
@@ -10,6 +13,7 @@
  *   salir    → cierra la sesión
  *
  * Los datos (token, dirección, rama y clave) están en config.php.
+ * El estado del sitio se guarda aparte, en datos/sitio.json.
  */
 declare(strict_types=1);
 
@@ -18,6 +22,8 @@ declare(strict_types=1);
 @ini_set('max_execution_time', '300');
 
 define('RAIZ', __DIR__);
+
+require_once __DIR__ . '/app/sitio.php';
 
 /** Lee config.php. Devuelve null si todavía no existe. */
 function cargar_config(): ?array {
@@ -38,6 +44,8 @@ session_start([
     'cookie_samesite' => 'Lax',
     'cookie_secure'   => !empty($_SERVER['HTTPS']),
 ]);
+
+header('X-Robots-Tag: noindex, nofollow');
 
 /* ------------------------------------------------------------------ */
 /* Herramientas                                                        */
@@ -554,6 +562,10 @@ if ($CFG && $_SERVER['REQUEST_METHOD'] === 'POST' && $csrf_ok && $aviso === '') 
             $ok = false; $aviso = 'Esa no es la clave.';
         }
 
+    /* Ya dentro: el estado del sitio (Configuración · Sitio) */
+    } elseif (isset($_POST['estado_sitio'])) {
+        [$ok, $aviso] = guardar_estado((string)$_POST['estado_sitio']);
+
     /* Ya dentro: la palabra */
     } else {
         $texto   = trim((string)($_POST['orden'] ?? ''));
@@ -573,7 +585,7 @@ if ($CFG && $_SERVER['REQUEST_METHOD'] === 'POST' && $csrf_ok && $aviso === '') 
                 case 'ayuda':   [$ok, $aviso, $consola] = palabra_ayuda(); break;
                 case 'salir':
                     session_destroy();
-                    header('Location: panel.php');
+                    header('Location: /admin');
                     exit;
                 default:
                     $ok = false;
@@ -583,7 +595,6 @@ if ($CFG && $_SERVER['REQUEST_METHOD'] === 'POST' && $csrf_ok && $aviso === '') 
     }
 }
 
-function e(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 $csrf = $_SESSION['csrf'];
 ?>
 <!doctype html>
@@ -619,12 +630,34 @@ $csrf = $_SESSION['csrf'];
   pre { margin: 10px 0 0; padding: 12px 14px; border-radius: 8px; background: #16181d;
         color: #e6e8ec; font-size: 12.5px; overflow-x: auto; white-space: pre-wrap;
         word-break: break-word; }
+  .sitio { margin-top: 26px; padding: 18px 18px 20px; border: 1px solid #e1e4ea;
+           border-radius: 12px; background: #fff; }
+  .sitio h2 { margin: 0 0 3px; font-size: 15px; }
+  .sitio .hint { margin: 0 0 14px; color: #6b7280; font-size: 13px; }
+  .sitio form { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sitio select { flex: 1; min-width: 220px; padding: 11px 12px; font: inherit;
+                  border: 1px solid #d0d3d9; border-radius: 8px; background: #fff; color: inherit; }
+  .sitio .fila { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+  .sitio .ver { display: inline-block; padding: 11px 16px; font-size: 14px; text-decoration: none;
+                color: inherit; border: 1px solid #d0d3d9; border-radius: 8px; }
+  .sitio .ver:hover { border-color: #2563eb; color: #2563eb; }
+  .sitio .publicar { background: #1d4ed8; color: #fff; }
+  .ahora { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 14px; font-size: 13.5px; }
+  .ahora b { font-weight: 600; }
+  .luz { width: 9px; height: 9px; border-radius: 50%; background: #d97706; flex: none; }
+  .luz.verde { background: #16a34a; }
+  .luz.gris  { background: #6b7280; }
+
   @media (prefers-color-scheme: dark) {
     body { background: #14161a; color: #e6e8ec; }
     input { background: #1c1f25; border-color: #333842; }
     button { background: #e6e8ec; color: #14161a; }
     .aviso { background: #16261c; border-color: #2c4634; }
     .aviso.mal { background: #2a1818; border-color: #4d2a2a; }
+    .sitio { background: #1c1f25; border-color: #333842; }
+    .sitio select { background: #1c1f25; border-color: #333842; }
+    .sitio .ver { border-color: #333842; }
+    .sitio .publicar { background: #2563eb; color: #fff; }
   }
 </style>
 <main>
@@ -681,6 +714,43 @@ $csrf = $_SESSION['csrf'];
   <?php if ($consola !== ''): ?>
     <pre><?= e($consola) ?></pre>
   <?php endif; ?>
+
+  <?php $estado_hoy = estado_sitio(); ?>
+  <section class="sitio">
+    <h2>Configuración · Sitio</h2>
+    <p class="hint">Qué ve una persona que entra al dominio. Se guarda en el servidor:
+       no hay que tocar código para activarlo ni para quitarlo.</p>
+
+    <p class="ahora">
+      <span class="luz <?= $estado_hoy === 'publicado' ? 'verde' : ($estado_hoy === 'mantenimiento' ? 'gris' : '') ?>"></span>
+      Ahora: <b><?= e(estados_posibles()[$estado_hoy]) ?></b>
+      <?php if (ajustes()['actualizado'] !== ''): ?>
+        <span style="color:#6b7280">· cambiado el <?= e(date('d-m-Y H:i', strtotime((string)ajustes()['actualizado']))) ?></span>
+      <?php endif; ?>
+    </p>
+
+    <form method="post">
+      <select name="estado_sitio" aria-label="Estado del sitio">
+        <?php foreach (estados_posibles() as $clave => $texto): ?>
+          <option value="<?= e($clave) ?>" <?= $clave === $estado_hoy ? 'selected' : '' ?>><?= e($texto) ?></option>
+        <?php endforeach; ?>
+      </select>
+      <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
+      <button>Guardar</button>
+    </form>
+
+    <div class="fila">
+      <a class="ver" href="/?ver=sitio" target="_blank" rel="noopener">Previsualizar sitio</a>
+      <a class="ver" href="/?ver=fachada" target="_blank" rel="noopener">Ver la fachada</a>
+      <?php if ($estado_hoy !== 'publicado'): ?>
+        <form method="post" onsubmit="return confirm('¿Deseas quitar el modo Coming Soon y publicar el sitio?')">
+          <input type="hidden" name="estado_sitio" value="publicado">
+          <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
+          <button class="publicar">Publicar sitio</button>
+        </form>
+      <?php endif; ?>
+    </div>
+  </section>
 <?php endif; ?>
 
 </main>

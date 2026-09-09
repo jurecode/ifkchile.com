@@ -6,3 +6,8 @@ Thumbs.db
 *.log
 .claude/
 *.zip
+
+# El estado del sitio es de cada servidor, como config.php.
+# La regla que protege la carpeta sí viaja.
+datos/*
+!datos/.htaccess

@@ -1,27 +1,76 @@
-# Base web
+# IFK · Inversiones Friomak
 
-Un archivo, `panel.php`. Lo subes a la carpeta de un dominio, lo abres en el
-navegador, y él solo escribe su configuración, crea el repositorio en GitHub y
-guarda el sitio. Después, todo se maneja escribiendo una palabra.
+Sitio de IFK en PHP simple, sin framework ni base de datos. Se administra desde
+`/admin`: ahí se decide qué ve el público y ahí está el enlace con GitHub.
 
-## Instalar en un dominio
+## Las tres caras del dominio
 
-1. Sube `panel.php` a la carpeta del dominio (`public_html`, o la del subdominio).
-2. Abre `midominio.cl/panel.php`.
-3. Te pide tres cosas: el **token** de GitHub, una **clave** para entrar después,
-   y el **nombre del repositorio** (vacío = el nombre del dominio).
-4. Botón *Guardar y clonar*.
+El sitio tiene un **estado**, y el estado decide lo que ve una persona que entra
+al dominio. Se cambia en el panel, en *Configuración · Sitio*, sin tocar código:
 
-Eso escribe `config.php` con permisos cerrados, agrega al `.htaccess` la regla
-que impide abrirlo desde el navegador, crea el repositorio —privado, si no
-existía— y sube el sitio tal como está en el servidor.
+| Estado | Qué ve el público |
+|---|---|
+| **Coming Soon** | sólo la fachada "Próximamente"; cualquier otra dirección vuelve a `/` |
+| **Publicado** | el sitio completo |
+| **Mantenimiento** | "Estamos realizando mejoras" (con código 503, para que Google espere) |
 
-Si el repositorio ya tenía contenido, en vez de subir enlaza la carpeta sin
-pisar ningún archivo tuyo y te deja listo para escribir `subir`.
+El administrador con sesión abierta puede ver el sitio real aunque el público
+siga viendo la fachada: botón **Previsualizar sitio**. Una barra abajo le
+recuerda qué está mirando y le deja volver.
 
-No hace falta el Git Version Control de cPanel, ni crear nada a mano en GitHub.
+Mientras el sitio no esté publicado, las páginas salen con `noindex, nofollow`
+y `robots.txt` dice que no se indexe nada. Al publicar, eso se revierte solo.
 
-## Palabras
+## Los archivos
+
+```
+index.php           la puerta: decide fachada, mantenimiento o sitio
+admin.php           el panel  (se entra por /admin)
+app/marca.php       la empresa: teléfono, correo, dirección y las 4 áreas
+app/contenido.php   respaldo, valores, método, proyectos, marcas, clientes
+app/cotizacion.php  el formulario de contacto: revisa, guarda y envía
+app/sitio.php       el estado del sitio, la sesión y las ayudas comunes
+vistas/             fachada y mantenimiento
+vistas/sitio/       las páginas del sitio y sus partes comunes
+assets/             imágenes, CSS y el JS del sitio
+datos/              estado y cotizaciones  (de cada servidor, no viaja a GitHub)
+config.php          token de GitHub y clave del panel  (tampoco viaja)
+```
+
+Para cambiar un teléfono, un correo o el texto de un área: `app/marca.php`.
+Para proyectos, marcas, valores o el método de trabajo: `app/contenido.php`.
+
+## Las páginas
+
+| Dirección | Qué es |
+|---|---|
+| `/` | portada |
+| `/servicios` | las cuatro áreas |
+| `/servicios/refrigeracion` `…/climatizacion` `…/ventilacion` `…/reefer` | una página por área |
+| `/proyectos` | trabajos realizados |
+| `/marcas` | marcas por rubro |
+| `/nosotros` | la empresa, sus valores y sus clientes |
+| `/contacto` | datos de contacto y solicitud de cotización |
+| `/robots.txt` `/sitemap.xml` | se arman solos según el estado del sitio |
+
+## El formulario de cotización
+
+Pide nombre, empresa, RUT, teléfono, correo, área, ubicación, descripción y hasta
+tres fotos. Cada solicitud se guarda primero en `datos/cotizaciones/` —un `.json`
+con los datos y las fotos al lado— y recién después se manda por correo a la
+casilla de la empresa, con las fotos adjuntas. Así, si el hosting no deja enviar
+correo, la solicitud igual queda registrada en el servidor.
+
+Trae un campo trampa escondido para los robots de spam, y responde con una
+redirección para que al recargar no se mande dos veces.
+
+## El panel
+
+Se abre en `midominio.cl/admin`. La primera vez pide tres cosas —token de
+GitHub, clave para entrar después y nombre del repositorio— y con eso escribe
+`config.php`, lo protege y enlaza la carpeta con GitHub.
+
+Después, todo se maneja escribiendo una palabra:
 
 | Palabra | Qué hace |
 |---|---|
@@ -34,37 +83,23 @@ No hace falta el Git Version Control de cPanel, ni crear nada a mano en GitHub.
 | `ayuda` | la lista de palabras |
 | `salir` | cierra la sesión |
 
-## El token
+El token necesita permiso `repo` (o, si es *fine-grained*, **Contents: Read and
+write** y **Administration: Read and write** para poder crear el repositorio).
 
-Uno clásico con permiso `repo` sirve tal cual. Si usas *fine-grained*, necesita
-**Contents: Read and write** y, para que el panel pueda crear repositorios,
-**Administration: Read and write**.
+`config.php` y `datos/` se quedan en cada servidor: nunca viajan a GitHub. Por
+eso un sitio de prueba puede estar publicado y el de verdad en Coming Soon.
 
-## config.php
+## Probar en el computador
 
-Lo escribe el panel; sólo hay que tocarlo para cambiar algo:
-
-```php
-<?php
-return [
-    'token' => 'el-token-de-github',
-    'clave' => 'la-clave-del-panel',
-    'repo'  => 'midominio.cl',
-];
+```bash
+php -S localhost:8788 -t . index.php
 ```
 
-`rama` es opcional y vale `main` si no se dice otra cosa. Este archivo se queda
-en cada servidor: nunca viaja a GitHub.
+El último `index.php` es el enrutador: sin él, `/admin` y `/servicios` no
+existen. Para entrar al panel en local hace falta un `config.php` con una clave.
 
-## Lo que el panel cuida solo
+## Lo que falta
 
-- El token no aparece en pantalla ni entra al repositorio.
-- Si GitHub va más adelante, no deja subir encima: primero manda a `traer`.
-- Si las dos partes cambiaron lo mismo, se detiene sin romper nada y ofrece
-  `traer github`, que guarda lo del servidor en una rama `respaldo-fecha`.
-- Al instalar, no baja una portada que tape la que el sitio ya tiene.
-
-## Un repositorio por dominio
-
-Cada sitio necesita el suyo: si dos dominios apuntaran al mismo, el `subir` de
-uno pisaría el sitio del otro.
+Están listos la fachada, el panel, el control de estado y el sitio completo.
+Queda el CMS —editar textos, proyectos y fotos desde el panel, y revisar ahí
+mismo las cotizaciones que llegan— y la publicación final.
