@@ -7,8 +7,8 @@ $aqui   = '/servicios';
 require __DIR__ . '/cabeza.php';
 ?>
 
-<section class="hero hero--corto">
-  <img class="hero__foto" src="<?= asset('img/refrigeracion.jpg') ?>" alt="" fetchpriority="high">
+<section class="hero hero--corto hero--clara">
+  <img class="hero__foto" src="<?= asset('img/areas/contenedores-1.jpg') ?>" alt="" fetchpriority="high">
   <div class="hero__velo"></div>
   <div class="env">
     <div class="hero__caja">

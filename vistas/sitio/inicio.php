@@ -4,11 +4,12 @@ $titulo = $SITE['nombre_largo'] . ' — ' . $SITE['claim'] . ' en el sur de Chil
 $desc   = 'Refrigeración industrial, climatización, ventilación y arriendo de contenedores refrigerados. '
         . 'Proyectos, servicio técnico y repuestos en las regiones X, XI, XII y XIV.';
 $aqui   = '/';
+$og_foto = 'img/portada.jpg';     // la que se ve al compartir el enlace
 require __DIR__ . '/cabeza.php';
 ?>
 
-<section class="hero">
-  <img class="hero__foto" src="<?= asset('img/hero.jpg') ?>" alt="" fetchpriority="high">
+<section class="hero hero--clara">
+  <img class="hero__foto" src="<?= asset('img/portada.jpg') ?>" alt="" fetchpriority="high">
   <div class="hero__velo"></div>
   <div class="env">
     <div class="hero__caja">
