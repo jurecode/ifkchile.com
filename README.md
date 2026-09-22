@@ -29,6 +29,8 @@ admin.php           el panel  (se entra por /admin)
 app/marca.php       la empresa: teléfono, correo, dirección y las 4 áreas
 app/contenido.php   respaldo, valores, método, proyectos, marcas, clientes
 app/cotizacion.php  el formulario de contacto: revisa, guarda y envía
+app/marcas.php      las marcas y sus logotipos
+contenido/          lo que se edita desde el panel (marcas)
 app/sitio.php       el estado del sitio, la sesión y las ayudas comunes
 vistas/             fachada y mantenimiento
 vistas/sitio/       las páginas del sitio y sus partes comunes
@@ -52,6 +54,22 @@ Para proyectos, marcas, valores o el método de trabajo: `app/contenido.php`.
 | `/nosotros` | la empresa, sus valores y sus clientes |
 | `/contacto` | datos de contacto y solicitud de cotización |
 | `/robots.txt` `/sitemap.xml` | se arman solos según el estado del sitio |
+
+## Las marcas y sus logotipos
+
+La lista vive en `contenido/marcas.json` y los archivos en `assets/img/marcas/`.
+Las dos cosas viajan a GitHub, así que lo que se sube desde el panel queda
+versionado y llega a cualquier otra instalación con `traer`.
+
+En el panel, la caja **Marcas · logotipos** recibe un PNG, JPG o WEBP —el PNG
+con fondo transparente es el que mejor queda—, lo deja a un tamaño parejo y lo
+asocia a la marca. Si el nombre ya estaba en la lista, le pega el logotipo; si
+no, agrega la marca.
+
+En el sitio se ven en tres lugares: una cinta que avanza sola en la portada, la
+rejilla por rubro de la página Marcas, y la tarjeta de cada área. Siempre en
+blanco y negro, y a color cuando les pasan el mouse. **Una marca sin logotipo
+muestra su nombre**, así que la sección nunca se ve a medio llenar.
 
 ## El formulario de cotización
 

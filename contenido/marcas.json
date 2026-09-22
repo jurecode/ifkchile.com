@@ -1,0 +1,83 @@
+{
+    "marcas": [
+        {
+            "id": "hispania",
+            "nombre": "Hispania",
+            "rubro": "Refrigeración",
+            "archivo": ""
+        },
+        {
+            "id": "danfoss",
+            "nombre": "Danfoss",
+            "rubro": "Refrigeración",
+            "archivo": ""
+        },
+        {
+            "id": "bitzer",
+            "nombre": "Bitzer",
+            "rubro": "Refrigeración",
+            "archivo": ""
+        },
+        {
+            "id": "dorin",
+            "nombre": "Dorin",
+            "rubro": "Refrigeración",
+            "archivo": ""
+        },
+        {
+            "id": "midea",
+            "nombre": "Midea",
+            "rubro": "Climatización",
+            "archivo": ""
+        },
+        {
+            "id": "hisense",
+            "nombre": "Hisense",
+            "rubro": "Climatización",
+            "archivo": ""
+        },
+        {
+            "id": "lg",
+            "nombre": "LG",
+            "rubro": "Climatización",
+            "archivo": ""
+        },
+        {
+            "id": "samsung",
+            "nombre": "Samsung",
+            "rubro": "Climatización",
+            "archivo": ""
+        },
+        {
+            "id": "trane",
+            "nombre": "Trane",
+            "rubro": "Climatización",
+            "archivo": ""
+        },
+        {
+            "id": "sodeca",
+            "nombre": "Sodeca",
+            "rubro": "Ventilación y extracción",
+            "archivo": ""
+        },
+        {
+            "id": "soler-y-palau",
+            "nombre": "Soler & Palau",
+            "rubro": "Ventilación y extracción",
+            "archivo": ""
+        },
+        {
+            "id": "carrier",
+            "nombre": "Carrier",
+            "rubro": "Contenedores refrigerados",
+            "archivo": ""
+        },
+        {
+            "id": "thermo-king",
+            "nombre": "Thermo King",
+            "rubro": "Contenedores refrigerados",
+            "archivo": ""
+        }
+    ],
+    "actualizado": "2026-09-22T22:40:34+00:00"
+}

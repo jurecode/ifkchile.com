@@ -659,6 +659,19 @@ if ($CFG && $_SERVER['REQUEST_METHOD'] === 'POST' && $csrf_ok && $aviso === '') 
     } elseif (isset($_POST['estado_sitio'])) {
         [$ok, $aviso] = guardar_estado((string)$_POST['estado_sitio']);
 
+    /* Ya dentro: un logotipo de marca */
+    } elseif (isset($_POST['marca_subir'])) {
+        require_once __DIR__ . '/app/marcas.php';
+        [$ok, $aviso] = marcas_subir_logo(
+            $_FILES['logo'] ?? [],
+            (string)($_POST['marca_nombre'] ?? ''),
+            (string)($_POST['marca_rubro'] ?? '')
+        );
+
+    } elseif (isset($_POST['marca_quitar'])) {
+        require_once __DIR__ . '/app/marcas.php';
+        [$ok, $aviso] = marcas_quitar_logo((string)$_POST['marca_quitar']);
+
     /* Ya dentro: la palabra */
     } else {
         $texto   = trim((string)($_POST['orden'] ?? ''));
@@ -745,6 +758,24 @@ $csrf = $_SESSION['csrf'];
   .luz.verde { background: #16a34a; }
   .luz.gris  { background: #6b7280; }
 
+  .marcas-panel { margin-top: 18px; }
+  .marcas-panel h3 { margin: 0 0 4px; font-size: 14px; }
+  .rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+             gap: 10px; margin-top: 14px; }
+  .rejilla figure { margin: 0; padding: 12px 10px 10px; border: 1px solid #e1e4ea; border-radius: 10px;
+                    background: #fbfcfe; text-align: center; }
+  .rejilla .caja { display: grid; place-items: center; height: 54px; }
+  .rejilla img { max-width: 100%; max-height: 54px; }
+  .rejilla .vacio { color: #9aa3ae; font-size: 12px; }
+  .rejilla figcaption { margin-top: 8px; font-size: 12.5px; font-weight: 600; }
+  .rejilla small { display: block; color: #6b7280; font-size: 11px; }
+  .rejilla button { margin-top: 8px; padding: 5px 10px; font-size: 11.5px; border-radius: 6px;
+                    background: #eef0f4; color: #16181d; }
+  .subir { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; align-items: end; }
+  .subir label { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; color: #6b7280; }
+  .subir input[type=file] { padding: 9px; font-size: 13px; }
+  .subir .ancho { grid-column: 1 / -1; }
+
   @media (prefers-color-scheme: dark) {
     body { background: #14161a; color: #e6e8ec; }
     input { background: #1c1f25; border-color: #333842; }
@@ -755,6 +786,8 @@ $csrf = $_SESSION['csrf'];
     .sitio select { background: #1c1f25; border-color: #333842; }
     .sitio .ver { border-color: #333842; }
     .sitio .publicar { background: #2563eb; color: #fff; }
+    .rejilla figure { background: #1c1f25; border-color: #333842; }
+    .rejilla button { background: #2a2f37; color: #e6e8ec; }
   }
 </style>
 <main>
@@ -847,6 +880,55 @@ $csrf = $_SESSION['csrf'];
         </form>
       <?php endif; ?>
     </div>
+  </section>
+
+  <?php require_once __DIR__ . '/app/marcas.php'; $marcas = marcas_listar(true); ?>
+  <section class="sitio marcas-panel">
+    <h2>Marcas · logotipos</h2>
+    <p class="hint">El logotipo aparece en la cinta de la portada y en la página Marcas,
+       en blanco y negro, y toma color cuando le pasan el mouse. Lo mejor es un
+       <b>PNG con fondo transparente</b>. Si una marca todavía no tiene logotipo,
+       el sitio muestra su nombre.</p>
+
+    <form method="post" enctype="multipart/form-data" class="subir">
+      <label class="ancho">Archivo del logotipo
+        <input type="file" name="logo" accept="image/png,image/jpeg,image/webp" required>
+      </label>
+      <label>Nombre de la marca
+        <input name="marca_nombre" placeholder="Danfoss" autocomplete="off">
+      </label>
+      <label>Rubro
+        <select name="marca_rubro">
+          <?php foreach (marcas_rubros() as $r): ?>
+            <option value="<?= e($r) ?>"><?= e($r) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </label>
+      <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
+      <div class="ancho"><button name="marca_subir" value="1">Subir logotipo</button></div>
+    </form>
+
+    <form method="post">
+      <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
+      <div class="rejilla">
+        <?php foreach ($marcas as $m): ?>
+          <figure>
+            <span class="caja">
+              <?php if ($m['archivo'] !== '' && is_file(CARPETA_LOGOS . '/' . $m['archivo'])): ?>
+                <img src="/assets/img/marcas/<?= e($m['archivo']) ?>?v=<?= (int)@filemtime(CARPETA_LOGOS . '/' . $m['archivo']) ?>"
+                     alt="<?= e($m['nombre']) ?>">
+              <?php else: ?>
+                <span class="vacio">sin logotipo</span>
+              <?php endif; ?>
+            </span>
+            <figcaption><?= e($m['nombre']) ?><small><?= e($m['rubro']) ?></small></figcaption>
+            <?php if ($m['archivo'] !== ''): ?>
+              <button name="marca_quitar" value="<?= e($m['id']) ?>">Quitar</button>
+            <?php endif; ?>
+          </figure>
+        <?php endforeach; ?>
+      </div>
+    </form>
   </section>
 <?php endif; ?>
 

@@ -161,16 +161,25 @@ require __DIR__ . '/cabeza.php';
       <h2 class="tit">Trabajamos con los fabricantes del rubro</h2>
       <p class="sub">Equipos, repuestos y respaldo técnico de las marcas que la industria ya conoce.</p>
     </div>
-    <ul class="marcas revelar">
-      <?php foreach ($MARCAS as $rubro => $lista): ?>
-        <li>
-          <h3><?= e($rubro) ?></h3>
-          <ul>
-            <?php foreach ($lista as $m): ?><li><?= e($m) ?></li><?php endforeach; ?>
-          </ul>
-        </li>
-      <?php endforeach; ?>
-    </ul>
+    <div class="desfile revelar">
+      <div class="desfile__pista">
+        <?php /* la fila va dos veces: así el desfile vuelve a empezar sin saltos */ ?>
+        <?php for ($vuelta = 0; $vuelta < 2; $vuelta++): ?>
+          <div class="desfile__grupo"<?= $vuelta ? ' aria-hidden="true"' : '' ?>>
+            <?php foreach (marcas_listar() as $m): ?>
+              <?php if ($m['archivo'] !== '' && is_file(CARPETA_LOGOS . '/' . $m['archivo'])): ?>
+                <span class="marca">
+                  <img src="<?= asset('img/marcas/' . $m['archivo']) ?>"
+                       alt="<?= e($m['nombre']) ?>" loading="lazy">
+                </span>
+              <?php else: ?>
+                <span class="marca marca--texto"><?= e($m['nombre']) ?></span>
+              <?php endif; ?>
+            <?php endforeach; ?>
+          </div>
+        <?php endfor; ?>
+      </div>
+    </div>
   </div>
 </section>
 

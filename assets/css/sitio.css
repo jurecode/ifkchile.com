@@ -285,6 +285,74 @@ p:last-child{margin-bottom:0}
 .marcas ul li{padding:8px 15px;border-radius:999px;background:var(--nieve);
               font-weight:700;font-size:.9rem;color:var(--tinta)}
 
+/* ---------------- Desfile de logotipos ---------------- */
+
+/* Una cinta que avanza sola y se detiene al pasarle el mouse. Los bordes se
+   desvanecen para que los logos no aparezcan cortados de golpe. */
+.desfile{
+  position:relative;overflow:hidden;padding:6px 0;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%);
+}
+.desfile__pista{display:flex;width:max-content;animation:desfilar 42s linear infinite}
+.desfile:hover .desfile__pista,
+.desfile:focus-within .desfile__pista{animation-play-state:paused}
+@keyframes desfilar{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.desfile__grupo{
+  display:flex;align-items:center;flex:none;
+  gap:clamp(40px,6vw,86px);padding-right:clamp(40px,6vw,86px);
+}
+
+/* Cada logotipo: en gris, y a color cuando le pasan por encima. */
+.marca{display:grid;place-items:center;flex:none;height:clamp(52px,6vw,76px)}
+.marca img{
+  max-height:100%;width:auto;max-width:clamp(120px,14vw,190px);object-fit:contain;
+  filter:grayscale(1) contrast(.92) opacity(.62);
+  transition:filter .35s ease,transform .35s ease;
+}
+.marca:hover img,.marca:focus-visible img{filter:none;transform:scale(1.05)}
+
+/* Marca sin logotipo todavía: su nombre, para que la fila nunca quede coja. */
+.marca--texto{
+  padding:0 clamp(18px,2vw,26px);border-radius:999px;background:#fff;box-shadow:var(--sombra);
+  font-weight:700;font-size:clamp(.95rem,1.2vw,1.08rem);color:var(--tinta-suave);white-space:nowrap;
+  transition:color .3s ease,transform .3s ease;
+}
+.marca--texto:hover{color:var(--azul-hondo);transform:scale(1.04)}
+
+/* En el teléfono no hay "pasar el mouse": ahí se muestran casi a color. */
+@media (hover:none){
+  .marca img{filter:grayscale(.2) opacity(.92)}
+}
+
+/* Quien pidió menos movimiento ve la misma fila, quieta y ordenada. */
+@media (prefers-reduced-motion:reduce){
+  .desfile{-webkit-mask-image:none;mask-image:none}
+  .desfile__pista{animation:none;width:100%}
+  .desfile__grupo{flex-wrap:wrap;justify-content:center;gap:clamp(26px,4vw,52px);padding-right:0}
+  .desfile__grupo[aria-hidden="true"]{display:none}
+}
+
+/* Las marcas dentro de la tarjeta de un área */
+.marcas-area{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px}
+.marcas-area .marca{height:44px}
+.marcas-area .marca img{max-width:118px;max-height:44px}
+.marcas-area .marca--texto{height:auto;padding:7px 14px;font-size:.88rem;background:var(--nieve);box-shadow:none}
+
+/* ---------------- Logotipos en rejilla (página Marcas) ---------------- */
+
+.logos{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));
+  gap:clamp(12px,1.6vw,20px);align-items:stretch;
+}
+.logos li{
+  display:grid;place-items:center;min-height:116px;padding:20px;
+  background:#fff;border-radius:18px;box-shadow:var(--sombra);
+}
+.logos .marca{height:auto;max-height:64px}
+.logos .marca img{max-width:100%;max-height:64px}
+.logos .marca--texto{box-shadow:none;background:transparent;padding:0;text-align:center;white-space:normal}
+
 /* ---------------- Nubes de texto (clientes) ---------------- */
 
 .nube{display:flex;flex-wrap:wrap;gap:9px}

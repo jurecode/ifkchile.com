@@ -55,8 +55,18 @@ $fondo = function () use (&$n_seccion): string { return (++$n_seccion % 2 === 0)
       <div class="marcas" style="grid-template-columns:1fr">
         <div style="padding:26px;border-radius:var(--r);background:#fff;border:1px solid var(--linea-clara);box-shadow:var(--sombra)">
           <h3 style="margin:0 0 14px;font-size:1.05rem;font-weight:800;letter-spacing:-.02em">Marcas con las que trabajamos</h3>
-          <ul class="tarjeta__lista">
-            <?php foreach ($A['marcas'] as $m): ?><li><?= e($m) ?></li><?php endforeach; ?>
+          <ul class="marcas-area">
+            <?php foreach ($A['marcas'] as $nombre): $mk = marca_por_nombre($nombre); ?>
+              <li>
+                <?php if (marca_tiene_logo($mk)): ?>
+                  <span class="marca">
+                    <img src="<?= asset('img/marcas/' . $mk['archivo']) ?>" alt="<?= e($nombre) ?>" loading="lazy">
+                  </span>
+                <?php else: ?>
+                  <span class="marca marca--texto"><?= e($nombre) ?></span>
+                <?php endif; ?>
+              </li>
+            <?php endforeach; ?>
           </ul>
 
           <p style="margin:22px 0 0;font-size:.9rem;color:var(--tinta-suave)">

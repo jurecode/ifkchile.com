@@ -14,7 +14,7 @@ declare(strict_types=1);
 /* Con el servidor de prueba de PHP, los archivos que existen los sirve él. */
 if (PHP_SAPI === 'cli-server') {
     $pedido = urldecode((string)parse_url((string)$_SERVER['REQUEST_URI'], PHP_URL_PATH));
-    if (preg_match('#^/(app|datos|vistas)/#', $pedido)) { http_response_code(403); exit; }
+    if (preg_match('#^/(app|datos|vistas|contenido)/#', $pedido)) { http_response_code(403); exit; }
     if ($pedido !== '/' && is_file(__DIR__ . $pedido)) return false;
 }
 
@@ -107,6 +107,7 @@ if (!puede_ver_sitio()) {
 /* ---------------- Sitio visible ---------------- */
 
 require __DIR__ . '/app/contenido.php';
+require __DIR__ . '/app/marcas.php';
 
 /* Las páginas con dirección propia. */
 $paginas = [

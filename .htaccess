@@ -9,7 +9,7 @@ DirectoryIndex index.php
   RewriteBase /
 
   # Las carpetas internas no se sirven nunca
-  RewriteRule ^(app|datos|vistas)/ - [F,L]
+  RewriteRule ^(app|datos|vistas|contenido)/ - [F,L]
 
   # Sin barra al final (menos en la raíz): /contacto/ → /contacto
   RewriteCond %{REQUEST_FILENAME} !-d

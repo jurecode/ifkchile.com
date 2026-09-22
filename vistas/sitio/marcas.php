@@ -23,16 +23,25 @@ require __DIR__ . '/cabeza.php';
 
 <section class="seccion">
   <div class="env">
-    <ul class="marcas">
-      <?php foreach ($MARCAS as $rubro => $lista): ?>
-        <li class="revelar">
-          <h2 style="margin:0 0 14px;font-size:1.05rem;font-weight:800;letter-spacing:-.02em"><?= e($rubro) ?></h2>
-          <ul>
-            <?php foreach ($lista as $m): ?><li><?= e($m) ?></li><?php endforeach; ?>
-          </ul>
-        </li>
-      <?php endforeach; ?>
-    </ul>
+    <?php foreach (marcas_por_rubro() as $rubro => $lista): ?>
+      <div class="revelar" style="margin-bottom:clamp(30px,4vw,52px)">
+        <h2 style="margin:0 0 16px;font-size:1.15rem;font-weight:800;letter-spacing:-.02em"><?= e($rubro) ?></h2>
+        <ul class="logos">
+          <?php foreach ($lista as $m): ?>
+            <li>
+              <?php if ($m['archivo'] !== '' && is_file(CARPETA_LOGOS . '/' . $m['archivo'])): ?>
+                <span class="marca">
+                  <img src="<?= asset('img/marcas/' . $m['archivo']) ?>"
+                       alt="<?= e($m['nombre']) ?>" loading="lazy">
+                </span>
+              <?php else: ?>
+                <span class="marca marca--texto"><?= e($m['nombre']) ?></span>
+              <?php endif; ?>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+      </div>
+    <?php endforeach; ?>
 
     <p class="sub revelar" style="margin-top:clamp(26px,3vw,40px)">
       Vendemos e instalamos equipos nuevos y trabajamos con repuestos originales.
