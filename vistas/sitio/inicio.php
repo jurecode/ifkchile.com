@@ -40,6 +40,32 @@ require __DIR__ . '/cabeza.php';
   </div>
 </section>
 
+<section class="seccion seccion--cinta seccion--nieve">
+  <div class="env">
+    <p class="cinta-titulo revelar">Trabajamos con los fabricantes del rubro
+       <a href="/marcas">Ver todas las marcas</a></p>
+  <div class="desfile revelar">
+    <div class="desfile__pista">
+      <?php /* la fila va dos veces: así el desfile vuelve a empezar sin saltos */ ?>
+      <?php for ($vuelta = 0; $vuelta < 2; $vuelta++): ?>
+        <div class="desfile__grupo"<?= $vuelta ? ' aria-hidden="true"' : '' ?>>
+          <?php foreach (marcas_listar() as $m): ?>
+            <?php if ($m['archivo'] !== '' && is_file(CARPETA_LOGOS . '/' . $m['archivo'])): ?>
+              <span class="marca">
+                <img src="<?= asset('img/marcas/' . $m['archivo']) ?>"
+                     alt="<?= e($m['nombre']) ?>" loading="lazy">
+              </span>
+            <?php else: ?>
+              <span class="marca marca--texto"><?= e($m['nombre']) ?></span>
+            <?php endif; ?>
+          <?php endforeach; ?>
+        </div>
+      <?php endfor; ?>
+    </div>
+  </div>
+  </div>
+</section>
+
 <section class="seccion">
   <div class="env">
     <ul class="tira revelar">
@@ -156,34 +182,6 @@ require __DIR__ . '/cabeza.php';
 </section>
 
 <section class="seccion seccion--nieve">
-  <div class="env">
-    <div class="cabeza-seccion revelar">
-      <h2 class="tit">Trabajamos con los fabricantes del rubro</h2>
-      <p class="sub">Equipos, repuestos y respaldo técnico de las marcas que la industria ya conoce.</p>
-    </div>
-    <div class="desfile revelar">
-      <div class="desfile__pista">
-        <?php /* la fila va dos veces: así el desfile vuelve a empezar sin saltos */ ?>
-        <?php for ($vuelta = 0; $vuelta < 2; $vuelta++): ?>
-          <div class="desfile__grupo"<?= $vuelta ? ' aria-hidden="true"' : '' ?>>
-            <?php foreach (marcas_listar() as $m): ?>
-              <?php if ($m['archivo'] !== '' && is_file(CARPETA_LOGOS . '/' . $m['archivo'])): ?>
-                <span class="marca">
-                  <img src="<?= asset('img/marcas/' . $m['archivo']) ?>"
-                       alt="<?= e($m['nombre']) ?>" loading="lazy">
-                </span>
-              <?php else: ?>
-                <span class="marca marca--texto"><?= e($m['nombre']) ?></span>
-              <?php endif; ?>
-            <?php endforeach; ?>
-          </div>
-        <?php endfor; ?>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="seccion">
   <div class="env">
     <div class="banda revelar">
       <div>

@@ -287,6 +287,16 @@ p:last-child{margin-bottom:0}
 
 /* ---------------- Desfile de logotipos ---------------- */
 
+/* Va pegada bajo la portada, así que es más baja que una sección normal. */
+.seccion--cinta{padding:clamp(26px,3.4vw,44px) 0}
+.cinta-titulo{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;
+  margin:0 0 clamp(16px,2vw,24px);color:var(--tinta-suave);font-size:.95rem;
+}
+.cinta-titulo a{color:var(--azul-hondo);font-weight:700}
+.cinta-titulo a::after{content:' →'}
+.cinta-titulo a:hover{text-decoration:underline;text-underline-offset:3px}
+
 /* Una cinta que avanza sola y se detiene al pasarle el mouse. Los bordes se
    desvanecen para que los logos no aparezcan cortados de golpe. */
 .desfile{
