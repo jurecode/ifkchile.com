@@ -129,7 +129,8 @@ require __DIR__ . '/cabeza.php';
       </div>
     </div>
     <div class="dos__foto revelar">
-      <img src="<?= asset('img/nosotros.jpg') ?>" alt="Técnico de IFK en terreno" loading="lazy">
+      <img src="<?= asset('img/nosotros-terreno.jpg') ?>"
+           alt="Técnico de IFK trabajando en un equipo de climatización en terreno" loading="lazy">
     </div>
   </div>
 </section>
