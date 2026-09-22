@@ -26,9 +26,9 @@ require __DIR__ . '/cabeza.php';
     <div class="revelar">
       <p class="eti">La empresa</p>
       <h2 class="tit">Técnicos, no intermediarios</h2>
-      <p class="sub">Trabajamos desde Puerto Montt con personal propio: proyectamos, instalamos,
-         ponemos en marcha y mantenemos. Eso nos permite responder rápido cuando algo falla y
-         hacernos cargo del equipo durante toda su vida útil.</p>
+      <p class="sub">Trabajamos desde Puerto Montt: proyectamos, instalamos, ponemos en marcha
+         y mantenemos. Eso nos permite responder rápido cuando algo falla y hacernos cargo del
+         equipo durante toda su vida útil.</p>
       <p class="sub" style="margin-top:14px">Atendemos las regiones X, XI, XII y XIV, y desarrollamos
          proyectos a nivel nacional para clientes que ya nos conocen.</p>
       <ul class="lista-check" style="margin-top:22px">

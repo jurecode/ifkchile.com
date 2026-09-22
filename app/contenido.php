@@ -24,7 +24,7 @@ $VALORES = [
 $METODO = [
     ['n' => '01', 't' => 'Visita y diagnóstico', 'd' => 'Vamos a terreno, medimos y entendemos qué necesita el recinto.'],
     ['n' => '02', 't' => 'Proyecto y cotización','d' => 'Propuesta técnica con equipos, plazos y valores claros.'],
-    ['n' => '03', 't' => 'Montaje y puesta en marcha', 'd' => 'Instalación con personal propio y entrega funcionando.'],
+    ['n' => '03', 't' => 'Montaje y puesta en marcha', 'd' => 'Montaje, puesta en marcha y entrega funcionando.'],
     ['n' => '04', 't' => 'Mantención y respaldo', 'd' => 'Planes preventivos, repuestos originales y emergencias.'],
 ];
 
