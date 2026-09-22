@@ -4,7 +4,7 @@
  * El enrutador define $envio (resultado de cotizacion_recibir) cuando llega un POST.
  */
 $titulo = 'Contacto — ' . $SITE['nombre_largo'];
-$desc   = 'Solicita una cotización de refrigeración, climatización, ventilación o arriendo reefer. '
+$desc   = 'Solicita una cotización de refrigeración, climatización, ventilación o contenedores refrigerados. '
         . 'WhatsApp ' . $SITE['telefono'] . ' · ' . $SITE['email'];
 $aqui   = '/contacto';
 $og_foto = 'img/ventilacion.jpg';

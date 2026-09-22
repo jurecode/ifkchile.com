@@ -8,7 +8,7 @@ declare(strict_types=1);
 /* Los cuatro números que resumen a la empresa. */
 $RESPALDO = [
     ['valor' => '10',   'label' => 'años de experiencia',   'detalle' => 'Operando desde el sur de Chile.'],
-    ['valor' => '4',    'label' => 'áreas especializadas',  'detalle' => 'Frío, clima, aire y reefer.'],
+    ['valor' => '4',    'label' => 'áreas especializadas',  'detalle' => 'Frío, clima, aire y contenedores.'],
     ['valor' => '4',    'label' => 'regiones con cobertura','detalle' => 'X · XI · XII · XIV.'],
     ['valor' => '24/7', 'label' => 'servicio de emergencia','detalle' => 'Respuesta ante fallas críticas.'],
 ];
@@ -28,11 +28,10 @@ $METODO = [
     ['n' => '04', 't' => 'Mantención y respaldo', 'd' => 'Planes preventivos, repuestos originales y emergencias.'],
 ];
 
-/* Proyectos realizados. Se muestran públicamente con permiso del cliente. */
+/* Proyectos realizados. Se muestran sin nombrar al cliente. */
 $PROYECTOS = [
     [
         'titulo'  => 'Cámaras de congelado',
-        'cliente' => 'Hotel Bellavista',
         'detalle' => 'Instalación y puesta en marcha de cámaras de congelado.',
         'lugar'   => 'Puerto Varas',
         'area'    => 'Refrigeración',
@@ -40,7 +39,6 @@ $PROYECTOS = [
     ],
     [
         'titulo'  => 'Climatización de clínica',
-        'cliente' => 'Clínica Puerto Varas',
         'detalle' => 'Instalación de equipos de aire acondicionado.',
         'lugar'   => 'Puerto Varas',
         'area'    => 'Climatización',
@@ -48,7 +46,6 @@ $PROYECTOS = [
     ],
     [
         'titulo'  => 'Proyecto integral',
-        'cliente' => 'Restaurant La Forja',
         'detalle' => 'Cámara de congelado, aire acondicionado y extracción de aire.',
         'lugar'   => 'Puerto Varas',
         'area'    => 'Refrigeración · Climatización · Ventilación',
@@ -64,9 +61,3 @@ $MARCAS = [
     'Arriendo Reefer'         => ['Carrier', 'Thermo King'],
 ];
 
-/* A quién atendemos. */
-$CLIENTES = [
-    'Salmoneras e industria acuícola', 'Plantas de proceso', 'Supermercados y comercio',
-    'Restaurantes y hoteles', 'Clínicas y centros de salud', 'Oficinas y edificios',
-    'Centros comerciales', 'Constructoras', 'Instituciones públicas', 'Viviendas particulares',
-];

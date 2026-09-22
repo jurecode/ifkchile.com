@@ -39,7 +39,11 @@ $suyos = array_values(array_filter($PROYECTOS, fn(array $p): bool => str_contain
       <h2 class="tit">Servicios del área</h2>
       <ul class="lista-check" style="margin-top:20px">
         <?php foreach ($A['servicios'] as $s): ?>
-          <li><?= e($s) ?></li>
+          <?php if (is_array($s)): /* un grupo: separa lo que es venta de lo que es servicio */ ?>
+            <li class="grupo"><?= e($s['grupo']) ?></li>
+          <?php else: ?>
+            <li><?= e($s) ?></li>
+          <?php endif; ?>
         <?php endforeach; ?>
       </ul>
     </div>
@@ -47,12 +51,7 @@ $suyos = array_values(array_filter($PROYECTOS, fn(array $p): bool => str_contain
     <div class="revelar">
       <div class="marcas" style="grid-template-columns:1fr">
         <div style="padding:26px;border-radius:var(--r);background:#fff;border:1px solid var(--linea-clara);box-shadow:var(--sombra)">
-          <h3 style="margin:0 0 14px;font-size:1.05rem;font-weight:800;letter-spacing:-.02em">Para quién trabajamos</h3>
-          <ul class="tarjeta__lista">
-            <?php foreach ($A['para'] as $p): ?><li><?= e($p) ?></li><?php endforeach; ?>
-          </ul>
-
-          <h3 style="margin:24px 0 14px;font-size:1.05rem;font-weight:800;letter-spacing:-.02em">Marcas con las que trabajamos</h3>
+          <h3 style="margin:0 0 14px;font-size:1.05rem;font-weight:800;letter-spacing:-.02em">Marcas con las que trabajamos</h3>
           <ul class="tarjeta__lista">
             <?php foreach ($A['marcas'] as $m): ?><li><?= e($m) ?></li><?php endforeach; ?>
           </ul>
@@ -66,8 +65,23 @@ $suyos = array_values(array_filter($PROYECTOS, fn(array $p): bool => str_contain
   </div>
 </section>
 
-<?php if ($suyos): ?>
+<?php if (!empty($A['esquema'])): ?>
 <section class="seccion seccion--nieve">
+  <div class="env">
+    <div class="cabeza-seccion revelar">
+      <p class="eti">Cómo funciona</p>
+      <h2 class="tit"><?= e($A['esquema']['titulo']) ?></h2>
+      <p class="sub"><?= e($A['esquema']['bajada']) ?></p>
+    </div>
+    <figure class="esquema revelar">
+      <img src="<?= asset($A['esquema']['archivo']) ?>" alt="<?= e($A['esquema']['titulo']) ?>" loading="lazy">
+    </figure>
+  </div>
+</section>
+<?php endif; ?>
+
+<?php if ($suyos): ?>
+<section class="seccion<?= empty($A['esquema']) ? ' seccion--nieve' : '' ?>">
   <div class="env">
     <div class="cabeza-seccion revelar">
       <p class="eti">Proyectos</p>
@@ -83,7 +97,7 @@ $suyos = array_values(array_filter($PROYECTOS, fn(array $p): bool => str_contain
           <div class="tarjeta__cuerpo">
             <h3><?= e($p['titulo']) ?></h3>
             <p><?= e($p['detalle']) ?></p>
-            <div class="proyecto__meta"><b><?= e($p['cliente']) ?></b> · <?= e($p['lugar']) ?></div>
+            <div class="proyecto__meta"><b><?= e($p['lugar']) ?></b></div>
           </div>
         </li>
       <?php endforeach; ?>
@@ -97,8 +111,8 @@ $suyos = array_values(array_filter($PROYECTOS, fn(array $p): bool => str_contain
     <div class="banda revelar">
       <div>
         <h2>Cotiza <?= e(mb_strtolower($A['nombre'])) ?></h2>
-        <p>Cuéntanos el recinto, el equipo o la falla. Te respondemos con una propuesta técnica
-           y, si es urgente, coordinamos visita.</p>
+        <p>Te respondemos con una propuesta técnica y, si es urgente, coordinamos visita.
+           También armamos programas de mantención preventiva.</p>
       </div>
       <div class="banda__botones">
         <a class="btn btn--claro" href="/contacto">Solicitar cotización</a>

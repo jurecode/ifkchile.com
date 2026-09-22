@@ -15,8 +15,8 @@ require __DIR__ . '/cabeza.php';
     <div class="hero__caja">
       <nav class="miga" aria-label="Dónde estás"><a href="/">Inicio</a><span>/</span>Proyectos</nav>
       <h1>Proyectos</h1>
-      <p>Instalaciones y puestas en marcha en hotelería, salud y gastronomía.
-         Cada trabajo se muestra con la autorización de su cliente.</p>
+      <p>Instalaciones y puestas en marcha en hotelería, salud y gastronomía
+         del sur de Chile.</p>
     </div>
   </div>
 </section>
@@ -33,7 +33,7 @@ require __DIR__ . '/cabeza.php';
           <div class="tarjeta__cuerpo">
             <h2 style="font-size:1.25rem;margin:0;font-weight:800;letter-spacing:-.02em"><?= e($p['titulo']) ?></h2>
             <p><?= e($p['detalle']) ?></p>
-            <div class="proyecto__meta"><b><?= e($p['cliente']) ?></b> · <?= e($p['lugar']) ?></div>
+            <div class="proyecto__meta"><b><?= e($p['lugar']) ?></b></div>
           </div>
         </li>
       <?php endforeach; ?>

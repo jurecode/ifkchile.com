@@ -118,7 +118,10 @@ $paginas = [
     'contacto'  => 'contacto',
 ];
 
-/* Cada área tiene su página: /servicios/refrigeracion, /servicios/reefer… */
+/* El área cambió de nombre: la dirección vieja sigue llevando a la nueva. */
+if ($ruta === 'servicios/reefer') llevar_a('/servicios/contenedores-refrigerados', 301);
+
+/* Cada área tiene su página: /servicios/refrigeracion, /servicios/climatizacion… */
 if (str_starts_with($ruta, 'servicios/')) {
     $llave_area = substr($ruta, strlen('servicios/'));
     if (isset($AREAS[$llave_area])) {

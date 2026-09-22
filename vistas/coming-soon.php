@@ -27,7 +27,7 @@ require __DIR__ . '/cabecera.php';
   <main class="centro">
 
     <p class="eti sube" style="--d:.15s">
-      <?= e($SITE['razon_social']) ?> · <?= (int)$SITE['anios'] ?> años en el sur de Chile
+      <?= e($SITE['razon_social']) ?> · Sur de Chile
     </p>
 
     <h1 class="sube" style="--d:.22s">

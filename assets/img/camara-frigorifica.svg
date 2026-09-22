@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 640" role="img"
+     aria-labelledby="titulo desc" font-family="Manrope, system-ui, sans-serif">
+  <title id="titulo">Partes de una cámara frigorífica</title>
+  <desc id="desc">Esquema de una cámara frigorífica: evaporador y lámpara en el cielo, válvula de
+descompensación y panel frigorífico en los muros, puerta frigorífica, panel de control de
+temperatura y unidad condensadora en el exterior.</desc>
+  <style>
+    .piso{fill:#e4ecf6} .fondo-der{fill:#eef4fb} .fondo-izq{fill:#f6fafd}
+    .cielo{fill:#fbfdff} .frente{fill:#ffffff;opacity:.55}
+    .eq-top{fill:#c2d8f0} .eq-der{fill:#9dc0e4} .eq-fte{fill:#a8c8e9}
+    .borde{fill:none;stroke:#0d1b2a;stroke-width:2.2;stroke-linejoin:round}
+    .fino{fill:none;stroke:#0d1b2a;stroke-width:1.5;stroke-linejoin:round}
+    .junta{fill:none;stroke:#0d1b2a;stroke-width:1.1;opacity:.4}
+    .guia{fill:none;stroke:#93aeca;stroke-width:1.5;stroke-dasharray:5 5}
+    .punto{fill:#2f6bb5;stroke:#fff;stroke-width:2}
+    .tit{fill:#0d1b2a;font-size:21px;font-weight:700;letter-spacing:-.01em}
+    .det{fill:#4e6076;font-size:15px;font-weight:500}
+  </style>
+
+  <!-- caja: piso, muros del fondo y cielo -->
+  <path d="M 660.0 190.0 L 965.5 366.4 L 732.7 500.8 L 427.2 324.4 Z" class="piso"/>
+  <path d="M 660.0 190.0 L 965.5 366.4 L 965.5 181.6 L 660.0 5.2 Z" class="fondo-der"/>
+  <path d="M 660.0 190.0 L 427.2 324.4 L 427.2 139.6 L 660.0 5.2 Z" class="fondo-izq"/>
+  <path d="M 736.4 234.1 L 736.4 49.3" class="junta"/><path d="M 812.8 278.2 L 812.8 93.4" class="junta"/><path d="M 889.1 322.3 L 889.1 137.5" class="junta"/><path d="M 601.8 223.6 L 601.8 38.8" class="junta"/><path d="M 543.6 257.2 L 543.6 72.4" class="junta"/><path d="M 485.4 290.8 L 485.4 106.0" class="junta"/>
+  <path d="M 660.0 190.0 L 965.5 366.4 L 732.7 500.8 L 427.2 324.4 Z" class="borde"/>
+  <path d="M 660.0 190.0 L 965.5 366.4 L 965.5 181.6 L 660.0 5.2 Z" class="borde"/>
+  <path d="M 660.0 190.0 L 427.2 324.4 L 427.2 139.6 L 660.0 5.2 Z" class="borde"/>
+
+
+  <!-- cielo y frentes translúcidos: la caja se lee cerrada y por dentro -->
+  <path d="M 660.0 5.2 L 965.5 181.6 L 732.7 316.0 L 427.2 139.6 Z" class="cielo" opacity=".9"/>
+  <path d="M 660.0 5.2 L 965.5 181.6 L 732.7 316.0 L 427.2 139.6 Z" class="fino"/>
+  <!-- lo que va adentro -->
+  <circle cx="583.6" cy="112.3" r="14" fill="#dceafa" stroke="#0d1b2a" stroke-width="2"/>
+  <circle cx="583.6" cy="112.3" r="5" fill="#0d1b2a"/>
+  <path d="M 605.4 86.3 L 696.4 138.8 L 683.3 146.3 L 592.3 93.8 Z" fill="#fdf0c2"/><path d="M 592.3 93.8 L 683.3 146.3 L 683.3 154.7 L 592.3 102.2 Z" fill="#f6e3a4"/>
+  <path d="M 605.4 86.3 L 696.4 138.8 L 683.3 146.3 L 592.3 93.8 Z" class="fino"/><path d="M 592.3 93.8 L 683.3 146.3 L 683.3 154.7 L 592.3 102.2 Z" class="fino"/>
+  <path d="M 818.6 113.6 L 913.1 168.2 L 879.7 187.5 L 785.1 132.9 Z" class="eq-top"/><path d="M 913.1 168.2 L 879.7 187.5 L 879.7 226.1 L 913.1 206.8 Z" class="eq-der"/><path d="M 785.1 132.9 L 879.7 187.5 L 879.7 226.1 L 785.1 171.5 Z" class="eq-fte"/>
+  <path d="M 818.6 113.6 L 913.1 168.2 L 879.7 187.5 L 785.1 132.9 Z" class="fino"/><path d="M 913.1 168.2 L 879.7 187.5 L 879.7 226.1 L 913.1 206.8 Z" class="fino"/><path d="M 785.1 132.9 L 879.7 187.5 L 879.7 226.1 L 785.1 171.5 Z" class="fino"/>
+  <ellipse cx="808.4" cy="166.5" rx="17" ry="10" fill="#eaf2fb" stroke="#0d1b2a" stroke-width="1.3"/><ellipse cx="860.8" cy="196.7" rx="17" ry="10" fill="#eaf2fb" stroke="#0d1b2a" stroke-width="1.3"/>
+  <path d="M 965.5 366.4 L 732.7 500.8 L 732.7 316.0 L 965.5 181.6 Z" class="frente"/>
+  <path d="M 427.2 324.4 L 732.7 500.8 L 732.7 316.0 L 427.2 139.6 Z" class="frente"/>
+  <path d="M 965.5 366.4 L 732.7 500.8 L 732.7 316.0 L 965.5 181.6 Z" class="borde"/>
+  <path d="M 427.2 324.4 L 732.7 500.8 L 732.7 316.0 L 427.2 139.6 Z" class="borde"/>
+
+  <!-- puerta y panel de control, sobre la cara derecha -->
+  <path d="M 823.7 448.3 L 823.7 288.7 L 750.9 330.7 L 750.9 490.3 Z" fill="#dceafa" class="borde"/>
+  <circle cx="811.3" cy="375.6" r="5.5" fill="#0d1b2a"/>
+  <path d="M 938.6 229.1 L 895.0 254.3 L 895.0 313.1 L 938.6 287.9 Z" class="eq-der"/><path d="M 890.6 251.7 L 895.0 254.3 L 895.0 313.1 L 890.6 310.5 Z" class="eq-fte"/>
+  <path d="M 938.6 229.1 L 895.0 254.3 L 895.0 313.1 L 938.6 287.9 Z" class="fino"/><path d="M 890.6 251.7 L 895.0 254.3 L 895.0 313.1 L 890.6 310.5 Z" class="fino"/>
+
+  <!-- cañería a la condensadora -->
+  <path d="M 918.2 213.1
+           C 994.6 257.2
+             1052.8 341.2
+             1038.3 421.0"
+        fill="none" stroke="#2f6bb5" stroke-width="3.2" stroke-linecap="round"/>
+
+  <!-- unidad condensadora, afuera -->
+  <path d="M 1009.2 472.2 L 1100.1 524.7 L 1027.4 566.7 L 936.4 514.2 Z" fill="#dfe5ec"/><path d="M 1100.1 524.7 L 1027.4 566.7 L 1027.4 578.5 L 1100.1 536.5 Z" fill="#c7d0da"/><path d="M 936.4 514.2 L 1027.4 566.7 L 1027.4 578.5 L 936.4 526.0 Z" fill="#d2dae3"/>
+  <path d="M 1009.2 410.1 L 1091.4 457.5 L 1027.4 494.5 L 945.2 447.0 Z" class="eq-top"/><path d="M 1091.4 457.5 L 1027.4 494.5 L 1027.4 561.7 L 1091.4 524.7 Z" class="eq-der"/><path d="M 945.2 447.0 L 1027.4 494.5 L 1027.4 561.7 L 945.2 514.2 Z" class="eq-fte"/>
+  <path d="M 1009.2 410.1 L 1091.4 457.5 L 1027.4 494.5 L 945.2 447.0 Z" class="fino"/><path d="M 1091.4 457.5 L 1027.4 494.5 L 1027.4 561.7 L 1091.4 524.7 Z" class="fino"/><path d="M 945.2 447.0 L 1027.4 494.5 L 1027.4 561.7 L 945.2 514.2 Z" class="fino"/>
+  <ellipse cx="1059.4" cy="509.6" rx="25" ry="15"
+           fill="#eaf2fb" stroke="#0d1b2a" stroke-width="1.5"/>
+  <circle cx="1059.4" cy="509.6" r="4.5" fill="#0d1b2a"/>
+
+  <path d="M 330 94 L 849.1 150.5" class="guia"/><circle cx="849.1" cy="150.5" r="4.5" class="punto"/><path d="M 330 216 L 644.7 124.9" class="guia"/><circle cx="644.7" cy="124.9" r="4.5" class="punto"/><path d="M 330 338 L 583.6 112.3" class="guia"/><circle cx="583.6" cy="112.3" r="4.5" class="punto"/><path d="M 330 460 L 489.1 208.9" class="guia"/><circle cx="489.1" cy="208.9" r="4.5" class="punto"/><path d="M 1270 94 L 915.3 255.9" class="guia"/><circle cx="915.3" cy="255.9" r="4.5" class="punto"/><path d="M 1270 252 L 1016.4 452.9" class="guia"/><circle cx="1016.4" cy="452.9" r="4.5" class="punto"/><path d="M 1270 432 L 787.3 385.3" class="guia"/><circle cx="787.3" cy="385.3" r="4.5" class="punto"/>
+  <text x="40" y="92" text-anchor="start" class="tit">Evaporador</text><text x="40" y="114" text-anchor="start" class="det">unidad interior</text><text x="40" y="214" text-anchor="start" class="tit">Lámpara</text><text x="40" y="236" text-anchor="start" class="det">iluminación estanca</text><text x="40" y="336" text-anchor="start" class="tit">Válvula de descompensación</text><text x="40" y="358" text-anchor="start" class="det">equilibra la presión de aire</text><text x="40" y="458" text-anchor="start" class="tit">Panel frigorífico</text><text x="40" y="480" text-anchor="start" class="det">POL o PUR</text><text x="1560" y="92" text-anchor="end" class="tit">Panel de control</text><text x="1560" y="114" text-anchor="end" class="det">temperatura y alarmas</text><text x="1560" y="250" text-anchor="end" class="tit">Unidad condensadora</text><text x="1560" y="272" text-anchor="end" class="det">equipo exterior</text><text x="1560" y="430" text-anchor="end" class="tit">Puerta frigorífica</text><text x="1560" y="452" text-anchor="end" class="det">corredera o abatible</text>
+</svg>

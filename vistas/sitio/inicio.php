@@ -1,7 +1,7 @@
 <?php
 /** Portada del sitio. */
 $titulo = $SITE['nombre_largo'] . ' — ' . $SITE['claim'] . ' en el sur de Chile';
-$desc   = 'Refrigeración industrial, climatización, ventilación y arriendo de contenedores reefer. '
+$desc   = 'Refrigeración industrial, climatización, ventilación y arriendo de contenedores refrigerados. '
         . 'Proyectos, servicio técnico y repuestos en las regiones X, XI, XII y XIV.';
 $aqui   = '/';
 require __DIR__ . '/cabeza.php';
@@ -12,10 +12,11 @@ require __DIR__ . '/cabeza.php';
   <div class="hero__velo"></div>
   <div class="env">
     <div class="hero__caja">
-      <p class="eti"><?= e($SITE['razon_social']) ?> · <?= (int)$SITE['anios'] ?> años</p>
-      <h1>Frío, clima y aire para la industria del sur de Chile</h1>
+      <p class="eti"><?= e($SITE['razon_social']) ?></p>
+      <h1>Frío, clima y aire para la industria del sur de Chile
+        <em>Refrigeración y HVAC</em></h1>
       <p><?= e($SITE['claim']) ?>. Proyectos, servicio técnico y repuestos con
-         personal propio y respaldo de las marcas líderes del rubro.</p>
+         respaldo de las marcas líderes del rubro.</p>
       <div class="hero__botones">
         <a class="btn btn--claro" href="/contacto">Solicitar cotización</a>
         <a class="btn btn--vidrio" href="<?= e(wa_link()) ?>" target="_blank" rel="noopener">
@@ -74,7 +75,7 @@ require __DIR__ . '/cabeza.php';
               <h3><?= e($a['nombre']) ?></h3>
               <p><?= e($a['bajada']) ?></p>
               <ul class="tarjeta__lista">
-                <?php foreach (array_slice($a['servicios'], 0, 3) as $s): ?>
+                <?php foreach (array_slice(array_filter($a['servicios'], 'is_string'), 0, 3) as $s): ?>
                   <li><?= e($s) ?></li>
                 <?php endforeach; ?>
               </ul>
@@ -149,9 +150,7 @@ require __DIR__ . '/cabeza.php';
           <div class="tarjeta__cuerpo">
             <h3><?= e($p['titulo']) ?></h3>
             <p><?= e($p['detalle']) ?></p>
-            <div class="proyecto__meta">
-              <b><?= e($p['cliente']) ?></b> · <?= e($p['lugar']) ?>
-            </div>
+            <div class="proyecto__meta"><b><?= e($p['lugar']) ?></b></div>
           </div>
         </li>
       <?php endforeach; ?>

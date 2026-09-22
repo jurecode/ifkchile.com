@@ -2,7 +2,7 @@
 /** Índice de servicios: las cuatro áreas. */
 $titulo = 'Servicios — ' . $SITE['nombre_largo'];
 $desc   = 'Refrigeración industrial, climatización, ventilación y extracción, y arriendo de '
-        . 'contenedores reefer. Proyectos, servicio técnico, repuestos y venta de equipos.';
+        . 'contenedores refrigerados. Proyectos, servicio técnico, repuestos y venta de equipos.';
 $aqui   = '/servicios';
 require __DIR__ . '/cabeza.php';
 ?>
@@ -36,7 +36,7 @@ require __DIR__ . '/cabeza.php';
               <h2><?= e($a['nombre']) ?></h2>
               <p><?= e($a['intro']) ?></p>
               <ul class="tarjeta__lista">
-                <?php foreach (array_slice($a['servicios'], 0, 3) as $s): ?>
+                <?php foreach (array_slice(array_filter($a['servicios'], 'is_string'), 0, 3) as $s): ?>
                   <li><?= e($s) ?></li>
                 <?php endforeach; ?>
               </ul>

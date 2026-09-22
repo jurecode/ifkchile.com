@@ -2,7 +2,7 @@
 /** Nosotros. */
 $titulo = 'Nosotros — ' . $SITE['nombre_largo'];
 $desc   = $SITE['razon_social'] . ': ' . $SITE['anios'] . ' años de experiencia en refrigeración, '
-        . 'climatización, ventilación y arriendo reefer en el sur de Chile.';
+        . 'climatización, ventilación y contenedores refrigerados en el sur de Chile.';
 $aqui   = '/nosotros';
 $og_foto = 'img/nosotros.jpg';
 require __DIR__ . '/cabeza.php';
@@ -57,14 +57,6 @@ require __DIR__ . '/cabeza.php';
           <p><?= e($v['d']) ?></p>
         </li>
       <?php endforeach; ?>
-    </ul>
-
-    <div class="cabeza-seccion revelar" style="margin-top:clamp(40px,5vw,64px)">
-      <p class="eti">Clientes</p>
-      <h2 class="tit">A quiénes atendemos</h2>
-    </div>
-    <ul class="nube revelar">
-      <?php foreach ($CLIENTES as $c): ?><li><?= e($c) ?></li><?php endforeach; ?>
     </ul>
   </div>
 </section>

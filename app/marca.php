@@ -11,7 +11,7 @@ $SITE = [
     'marca'        => 'IFK',
     'razon_social' => 'Inversiones Friomak SpA',
     'nombre_largo' => 'IFK · Inversiones Friomak',
-    'claim'        => 'Refrigeración, climatización, ventilación y arriendo reefer',
+    'claim'        => 'Refrigeración, climatización, ventilación y contenedores refrigerados',
     'anios'        => 10,
     'dominio'      => 'https://ifkchile.com',
     'email'        => 'contacto@ifkchile.com',   // pendiente de confirmar con el cliente
@@ -30,27 +30,37 @@ $SITE = [
     ],
 ];
 
-/* Las cuatro áreas del negocio. El orden es el del menú y el del sitio. */
+/* Las cuatro áreas del negocio. El orden es el del menú y el del sitio.
+   "para" queda guardado pero no se muestra: el cliente pidió sacar los
+   apartados de clientes de todo el sitio. */
 $AREAS = [
     'refrigeracion' => [
         'nombre'    => 'Refrigeración',
         'menu'      => 'Refrigeración',
         'nota'      => 'Baja y media temperatura',
         'bajada'    => 'Cámaras frigoríficas, túneles de congelado y servicio técnico industrial.',
-        'intro'     => 'Diseñamos, construimos y mantenemos sistemas de frío para industria, '
-                     . 'comercio y acuicultura, con respaldo técnico permanente y repuestos originales.',
+        'intro'     => 'Diseño, montaje y programas de mantenimiento para la industria y el comercio, '
+                     . 'con respaldo técnico permanente y repuestos originales.',
         'foto'      => 'img/refrigeracion.jpg',
         'meta'      => ['Baja y media T°', 'Industrial'],
         'servicios' => [
             'Servicio técnico correctivo y preventivo',
             'Construcción de cámaras frigoríficas de baja y media temperatura',
             'Túneles de congelado',
+            'Puesta en marcha y programas de mantención',
+            ['grupo' => 'Ventas'],
             'Venta de repuestos y máquinas de hielo',
-            'Puesta en marcha y planes de mantención',
         ],
         'para'      => ['Salmoneras e industria acuícola', 'Supermercados y comercio',
                         'Restaurantes y hoteles', 'Plantas de proceso'],
         'marcas'    => ['Hispania', 'Danfoss', 'Bitzer', 'Dorin'],
+        'esquema'   => [
+            'archivo' => 'img/camara-frigorifica.svg',
+            'titulo'  => 'Las partes de una cámara frigorífica',
+            'bajada'  => 'Cada pieza cumple una función: el evaporador enfría, la unidad '
+                       . 'condensadora disipa el calor afuera, la válvula equilibra la presión '
+                       . 'y el panel aísla. Nosotros proyectamos, montamos y mantenemos el conjunto.',
+        ],
     ],
     'climatizacion' => [
         'nombre'    => 'Climatización',
@@ -77,8 +87,10 @@ $AREAS = [
         'menu'      => 'Ventilación',
         'nota'      => 'Tratamiento de aire',
         'bajada'    => 'Tratamiento de aire, extracción y renovación en recintos comerciales e industriales.',
-        'intro'     => 'Soluciones de ventilación y extracción que aseguran calidad de aire, control de '
-                     . 'humedad y cumplimiento normativo en cocinas, plantas y recintos cerrados.',
+        'intro'     => 'Soluciones de ventilación y extracción para garantizar calidad de aire, control de '
+                     . 'humedad y cumplimiento normativo en cocinas, plantas y recintos cerrados. Incluimos '
+                     . 'cálculo de caudal, velocidad de captura y presión estática para la correcta selección '
+                     . 'de equipos y ductos, además de programas de mantención preventiva.',
         'foto'      => 'img/ventilacion.jpg',
         'meta'      => ['Tratamiento de aire', 'Comercial e industrial'],
         'servicios' => [
@@ -92,21 +104,24 @@ $AREAS = [
                         'Bodegas y talleres', 'Instituciones públicas'],
         'marcas'    => ['Sodeca', 'Soler & Palau'],
     ],
-    'reefer' => [
-        'nombre'    => 'Arriendo Reefer',
-        'menu'      => 'Arriendo Reefer',
+    'contenedores-refrigerados' => [
+        'nombre'    => 'Contenedores refrigerados',
+        'menu'      => 'Contenedores refrigerados',
         'nota'      => 'Arriendo y logística',
         'bajada'    => 'Contenedores refrigerados de +30 °C a −29 °C, con arriendo y logística.',
-        'intro'     => 'Arriendo de contenedores reefer con control de temperatura, apoyo logístico y '
+        'intro'     => 'Arriendo de contenedores refrigerados con control de temperatura, apoyo logístico y '
                      . 'soporte técnico durante toda la operación.',
-        'foto'      => 'img/reefer.jpg',
+        'foto'      => 'img/contenedores.jpg',
         'meta'      => ['+30 °C / −29 °C', 'Arriendo y logística'],
         'servicios' => [
             'Arriendo de contenedores refrigerados',
             'Rango de temperatura desde +30 °C hasta −29 °C',
+            'Reparación y puesta en marcha',
+            'Instalación de sondas USDA',
+            'Tratamiento de frío en contenedores',
+            'Actualizaciones de software según controlador y equipo',
             'Logística y traslado de contenedores',
             'Monitoreo y soporte técnico en terreno',
-            'Soluciones temporales para peaks de producción',
         ],
         'para'      => ['Industria acuícola y pesquera', 'Agroindustria',
                         'Eventos y contingencias', 'Operadores logísticos'],
