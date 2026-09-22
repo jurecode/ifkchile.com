@@ -535,6 +535,55 @@ function palabra_cotizaciones(string $resto = ''): array {
     return [true, $aviso, implode("\n", $l)];
 }
 
+/**
+ * Cambia el token de GitHub sin tocar config.php a mano.
+ * Antes de guardarlo comprueba dos cosas: que GitHub lo reconozca y que
+ * tenga permiso de escritura en el repositorio; si no, no lo guarda.
+ */
+function palabra_token(array $c, string $nuevo): array {
+    $nuevo = trim($nuevo);
+    if ($nuevo === '') {
+        return [false, 'Escribe el token después de la palabra: token ghp_…', ''];
+    }
+    if (preg_match('/\s/', $nuevo)) {
+        return [false, 'El token no lleva espacios. Cópialo completo, de una sola vez.', ''];
+    }
+
+    /* 1. ¿De quién es? */
+    [$cod, $d] = api(['token' => $nuevo], 'GET', '/user');
+    if ($cod !== 200 || empty($d['login'])) {
+        $motivo = $cod === 401
+            ? 'GitHub no reconoció ese token: puede estar incompleto o vencido.'
+            : 'GitHub contestó ' . $cod . ' al preguntar de quién es el token.';
+        return [false, $motivo, ''];
+    }
+    $duenio = (string)$d['login'];
+
+    /* 2. ¿Puede escribir en este repositorio? */
+    $nombre = repo_nombre($c);
+    [$cod2, $r] = api(['token' => $nuevo], 'GET', '/repos/' . $nombre);
+    if ($cod2 === 404) {
+        return [false, 'El token no ve el repositorio ' . $nombre . '. Si es de los nuevos '
+                     . '(fine-grained), dale acceso a ese repositorio.', 'Cuenta: ' . $duenio];
+    }
+    if ($cod2 !== 200) {
+        return [false, 'GitHub contestó ' . $cod2 . ' al mirar ' . $nombre . '.', 'Cuenta: ' . $duenio];
+    }
+    if (empty($r['permissions']['push'])) {
+        return [false, 'Ese token entra, pero es de sólo lectura: no puede subir. Dale permiso de '
+                     . 'escritura (Contents: Read and write) y vuelve a intentarlo.',
+                "Cuenta: $duenio\nRepositorio: $nombre\nLeer: sí   ·   Escribir: no"];
+    }
+
+    /* 3. Guardar, conservando la clave y el repositorio de siempre. */
+    if (!guardar_config($nuevo, (string)$c['clave'], (string)($c['repo'] ?? ''))) {
+        return [false, 'No pude escribir config.php. Dale permiso de escritura a la carpeta.', ''];
+    }
+
+    return [true, 'Token nuevo guardado. Ya puedes escribir "subir".',
+            "Cuenta:       $duenio\nRepositorio:  $nombre\nEscribir:     sí"];
+}
+
 function palabra_ayuda(): array {
     return [true, 'Palabras que entiende el panel:', implode("\n", [
         'estado            cómo está la carpeta y qué falta',
@@ -543,6 +592,7 @@ function palabra_ayuda(): array {
         'traer             guarda lo tuyo y baja lo nuevo de GitHub',
         'traer github      deja esta carpeta igual que GitHub (guarda lo de aquí aparte)',
         'instalar          enlaza con GitHub un sitio que ya está en el servidor, sin tocar nada',
+        'token ghp_…       cambia el token de GitHub (comprueba que pueda escribir)',
         'cotizaciones      las solicitudes que llegaron por el formulario',
         'cotizaciones 30   las últimas 30, en vez de las 10 de siempre',
         'ayuda             esta lista',
@@ -625,6 +675,7 @@ if ($CFG && $_SERVER['REQUEST_METHOD'] === 'POST' && $csrf_ok && $aviso === '') 
                 case 'subir':   [$ok, $aviso, $consola] = palabra_subir($CFG, $resto); break;
                 case 'traer':   [$ok, $aviso, $consola] = palabra_traer($CFG, $resto); break;
                 case 'instalar':[$ok, $aviso, $consola] = palabra_instalar($CFG); break;
+                case 'token':   [$ok, $aviso, $consola] = palabra_token($CFG, $resto); break;
                 case 'cotizaciones':
                 case 'cotizacion':
                                 [$ok, $aviso, $consola] = palabra_cotizaciones($resto); break;
@@ -752,7 +803,7 @@ $csrf = $_SESSION['csrf'];
     <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
     <button>Hacer</button>
   </form>
-  <p class="palabras">estado · subir · traer · instalar · cotizaciones · ayuda · salir</p>
+  <p class="palabras">estado · subir · traer · instalar · cotizaciones · token · ayuda · salir</p>
 
   <?php if ($aviso): ?>
     <div class="aviso <?= $ok ? '' : 'mal' ?>"><?= e($aviso) ?></div>
