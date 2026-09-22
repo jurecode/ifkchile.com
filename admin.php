@@ -672,6 +672,14 @@ if ($CFG && $_SERVER['REQUEST_METHOD'] === 'POST' && $csrf_ok && $aviso === '') 
         require_once __DIR__ . '/app/marcas.php';
         [$ok, $aviso] = marcas_quitar_logo((string)$_POST['marca_quitar']);
 
+    } elseif (isset($_POST['marca_borrar'])) {
+        require_once __DIR__ . '/app/marcas.php';
+        [$ok, $aviso] = marcas_borrar((string)$_POST['marca_borrar']);
+
+    } elseif (isset($_POST['marcas_guardar'])) {
+        require_once __DIR__ . '/app/marcas.php';
+        [$ok, $aviso] = marcas_actualizar((array)($_POST['m'] ?? []));
+
     /* Ya dentro: la palabra */
     } else {
         $texto   = trim((string)($_POST['orden'] ?? ''));
@@ -767,10 +775,14 @@ $csrf = $_SESSION['csrf'];
   .rejilla .caja { display: grid; place-items: center; height: 54px; }
   .rejilla img { max-width: 100%; max-height: 54px; }
   .rejilla .vacio { color: #9aa3ae; font-size: 12px; }
-  .rejilla figcaption { margin-top: 8px; font-size: 12.5px; font-weight: 600; }
-  .rejilla small { display: block; color: #6b7280; font-size: 11px; }
+  .rejilla .campo-nombre { width: 100%; margin-top: 9px; padding: 7px 9px; font-size: 12.5px;
+                           border: 1px solid #d0d3d9; border-radius: 6px; background: #fff; color: inherit; }
+  .rejilla select { width: 100%; margin-top: 6px; padding: 6px 8px; font-size: 11.5px;
+                    border: 1px solid #d0d3d9; border-radius: 6px; background: #fff; color: inherit; }
+  .rejilla .acciones { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
   .rejilla button { margin-top: 8px; padding: 5px 10px; font-size: 11.5px; border-radius: 6px;
                     background: #eef0f4; color: #16181d; }
+  .rejilla button.borrar { background: #fdecec; color: #8a2020; }
   .subir { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; align-items: end; }
   .subir label { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; color: #6b7280; }
   .subir input[type=file] { padding: 9px; font-size: 13px; }
@@ -788,6 +800,8 @@ $csrf = $_SESSION['csrf'];
     .sitio .publicar { background: #2563eb; color: #fff; }
     .rejilla figure { background: #1c1f25; border-color: #333842; }
     .rejilla button { background: #2a2f37; color: #e6e8ec; }
+    .rejilla button.borrar { background: #3a2020; color: #f3c7c7; }
+    .rejilla .campo-nombre, .rejilla select { background: #14161a; border-color: #333842; }
   }
 </style>
 <main>
@@ -892,7 +906,9 @@ $csrf = $_SESSION['csrf'];
 
     <form method="post" enctype="multipart/form-data" class="subir">
       <label class="ancho">Archivo del logotipo
-        <input type="file" name="logo" accept="image/png,image/jpeg,image/webp" required>
+        <input type="file" name="logo" accept="image/png,image/jpeg,image/webp">
+        <small style="color:#8b919b;font-size:11.5px">Opcional: con sólo el nombre, la marca
+          entra a la lista y queda esperando su logotipo.</small>
       </label>
       <label>Nombre de la marca
         <input name="marca_nombre" placeholder="Danfoss" autocomplete="off">
@@ -905,29 +921,43 @@ $csrf = $_SESSION['csrf'];
         </select>
       </label>
       <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
-      <div class="ancho"><button name="marca_subir" value="1">Subir logotipo</button></div>
+      <div class="ancho"><button name="marca_subir" value="1">Agregar o actualizar</button></div>
     </form>
 
     <form method="post">
       <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
+      <p class="hint" style="margin:20px 0 0">Las <?= count($marcas) ?> marcas registradas. Cambia el
+         nombre o el rubro y presiona <b>Guardar los cambios</b>. Si cambias el nombre, el logotipo
+         se va con él.</p>
       <div class="rejilla">
-        <?php foreach ($marcas as $m): ?>
+        <?php foreach ($marcas as $m): $tiene = $m['archivo'] !== '' && is_file(CARPETA_LOGOS . '/' . $m['archivo']); ?>
           <figure>
             <span class="caja">
-              <?php if ($m['archivo'] !== '' && is_file(CARPETA_LOGOS . '/' . $m['archivo'])): ?>
+              <?php if ($tiene): ?>
                 <img src="/assets/img/marcas/<?= e($m['archivo']) ?>?v=<?= (int)@filemtime(CARPETA_LOGOS . '/' . $m['archivo']) ?>"
                      alt="<?= e($m['nombre']) ?>">
               <?php else: ?>
                 <span class="vacio">sin logotipo</span>
               <?php endif; ?>
             </span>
-            <figcaption><?= e($m['nombre']) ?><small><?= e($m['rubro']) ?></small></figcaption>
-            <?php if ($m['archivo'] !== ''): ?>
-              <button name="marca_quitar" value="<?= e($m['id']) ?>">Quitar</button>
-            <?php endif; ?>
+            <input class="campo-nombre" name="m[<?= e($m['id']) ?>][nombre]" value="<?= e($m['nombre']) ?>"
+                   aria-label="Nombre de <?= e($m['nombre']) ?>">
+            <select name="m[<?= e($m['id']) ?>][rubro]" aria-label="Rubro de <?= e($m['nombre']) ?>">
+              <?php foreach (marcas_rubros() as $r): ?>
+                <option value="<?= e($r) ?>" <?= $r === $m['rubro'] ? 'selected' : '' ?>><?= e($r) ?></option>
+              <?php endforeach; ?>
+            </select>
+            <div class="acciones">
+              <?php if ($tiene): ?>
+                <button name="marca_quitar" value="<?= e($m['id']) ?>">Quitar logo</button>
+              <?php endif; ?>
+              <button class="borrar" name="marca_borrar" value="<?= e($m['id']) ?>"
+                      onclick="return confirm('¿Borrar la marca <?= e($m['nombre']) ?> del sitio?')">Borrar</button>
+            </div>
           </figure>
         <?php endforeach; ?>
       </div>
+      <button name="marcas_guardar" value="1" style="margin-top:14px">Guardar los cambios</button>
     </form>
   </section>
 <?php endif; ?>

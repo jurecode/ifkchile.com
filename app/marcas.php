@@ -103,14 +103,22 @@ function marcas_guardar(array $marcas): bool {
 }
 
 /**
- * Guarda el logotipo que llega del panel.
- * @param array $subido un elemento de $_FILES
+ * Agrega una marca o le cambia el logotipo. El archivo es opcional: una marca
+ * puede existir sólo con su nombre, y recibir el logotipo más adelante.
+ *
+ * @param array $subido un elemento de $_FILES (puede venir vacío)
  * @return array{0:bool,1:string} [salió bien, aviso]
  */
 function marcas_subir_logo(array $subido, string $nombre, string $rubro): array {
-    if (($subido['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
-        return [false, 'Elige el archivo del logotipo.'];
+    $sin_archivo = ($subido['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE;
+
+    /* Sólo el nombre: la marca entra a la lista y queda esperando su logotipo. */
+    if ($sin_archivo) {
+        $nombre = trim($nombre);
+        if ($nombre === '') return [false, 'Escribe el nombre de la marca, o elige un archivo.'];
+        return marcas_anotar($nombre, $rubro, null);
     }
+
     if (($subido['error'] ?? 1) !== UPLOAD_ERR_OK) {
         return [false, 'No se pudo recibir el archivo. Puede que pese demasiado para este servidor.'];
     }
@@ -140,25 +148,105 @@ function marcas_subir_logo(array $subido, string $nombre, string $rubro): array 
         return [false, 'No pude procesar la imagen.'];
     }
 
-    /* Si la marca ya estaba en la lista, se le pega el logotipo; si no, entra. */
+    return marcas_anotar($nombre, $rubro, $id . '.png');
+}
+
+/**
+ * Deja la marca en la lista: si ya estaba, la actualiza; si no, la agrega.
+ * $archivo null significa "no toques el logotipo que ya tenga".
+ */
+function marcas_anotar(string $nombre, string $rubro, ?string $archivo): array {
+    $id     = marca_id($nombre);
+    $rubro  = in_array($rubro, marcas_rubros(), true) ? $rubro : 'General';
     $marcas = marcas_listar();
-    $encontrada = false;
+
     foreach ($marcas as &$m) {
-        if ($m['id'] === $id) {
-            $m['nombre']  = $nombre;
-            $m['rubro']   = $rubro;
-            $m['archivo'] = $id . '.png';
-            $encontrada = true;
-            break;
-        }
+        if ($m['id'] !== $id) continue;
+        $m['nombre'] = $nombre;
+        $m['rubro']  = $rubro;
+        if ($archivo !== null) $m['archivo'] = $archivo;
+        unset($m);
+        return marcas_guardar($marcas)
+            ? [true, ($archivo !== null ? 'Logotipo de ' : 'Marca ') . $nombre . ' guardado.']
+            : [false, 'No pude guardar contenido/marcas.json.'];
     }
     unset($m);
-    if (!$encontrada) {
-        $marcas[] = ['id' => $id, 'nombre' => $nombre, 'rubro' => $rubro, 'archivo' => $id . '.png'];
+
+    $marcas[] = ['id' => $id, 'nombre' => $nombre, 'rubro' => $rubro, 'archivo' => $archivo ?? ''];
+    return marcas_guardar($marcas)
+        ? [true, 'Marca ' . $nombre . ' agregada.']
+        : [false, 'No pude guardar contenido/marcas.json.'];
+}
+
+/**
+ * Guarda los cambios de nombre y rubro hechos en la tabla del panel.
+ * Si cambia el nombre, cambia la llave y el archivo del logotipo se renombra
+ * con ella, para que las dos cosas no se separen nunca.
+ *
+ * @param array<string,array{nombre?:string,rubro?:string}> $filas  llave => campos
+ */
+function marcas_actualizar(array $filas): array {
+    $marcas  = marcas_listar();
+    $ids     = array_column($marcas, 'id');
+    $cambios = 0;
+    $avisos  = [];
+
+    foreach ($marcas as $i => $m) {
+        $fila = $filas[$m['id']] ?? null;
+        if (!is_array($fila)) continue;
+
+        $nombre = trim((string)($fila['nombre'] ?? ''));
+        $rubro  = (string)($fila['rubro'] ?? $m['rubro']);
+        if ($nombre === '') { $avisos[] = 'A ' . $m['nombre'] . ' le faltó el nombre: no se cambió.'; continue; }
+        if (!in_array($rubro, marcas_rubros(), true)) $rubro = $m['rubro'];
+
+        $nuevo_id = marca_id($nombre);
+
+        /* Dos marcas no pueden terminar con la misma llave. */
+        if ($nuevo_id !== $m['id'] && in_array($nuevo_id, $ids, true)) {
+            $avisos[] = 'Ya hay otra marca que se llama ' . $nombre . ': ese cambio se dejó como estaba.';
+            continue;
+        }
+
+        if ($nombre === $m['nombre'] && $rubro === $m['rubro']) continue;
+
+        /* El logotipo acompaña al nombre nuevo. */
+        if ($nuevo_id !== $m['id'] && $m['archivo'] !== '') {
+            $viejo = CARPETA_LOGOS . '/' . $m['archivo'];
+            $nuevo = CARPETA_LOGOS . '/' . $nuevo_id . '.png';
+            if (is_file($viejo) && @rename($viejo, $nuevo)) {
+                $marcas[$i]['archivo'] = $nuevo_id . '.png';
+            }
+        }
+
+        $ids[$i] = $nuevo_id;
+        $marcas[$i]['id']     = $nuevo_id;
+        $marcas[$i]['nombre'] = $nombre;
+        $marcas[$i]['rubro']  = $rubro;
+        $cambios++;
     }
 
+    if ($cambios === 0 && !$avisos) return [true, 'No había nada que cambiar.'];
     if (!marcas_guardar($marcas)) return [false, 'No pude guardar contenido/marcas.json.'];
-    return [true, 'Logotipo de ' . $nombre . ' guardado.'];
+
+    $aviso = $cambios === 1 ? 'Se guardó 1 cambio.' : 'Se guardaron ' . $cambios . ' cambios.';
+    return [empty($avisos), $aviso . ($avisos ? ' ' . implode(' ', $avisos) : '')];
+}
+
+/** Saca la marca de la lista, con su logotipo. */
+function marcas_borrar(string $id): array {
+    $marcas = marcas_listar();
+    foreach ($marcas as $i => $m) {
+        if ($m['id'] !== $id) continue;
+        if ($m['archivo'] !== '' && is_file(CARPETA_LOGOS . '/' . $m['archivo'])) {
+            @unlink(CARPETA_LOGOS . '/' . $m['archivo']);
+        }
+        unset($marcas[$i]);
+        return marcas_guardar($marcas)
+            ? [true, 'Marca ' . $m['nombre'] . ' borrada.']
+            : [false, 'No pude guardar contenido/marcas.json.'];
+    }
+    return [false, 'No encontré esa marca.'];
 }
 
 /**
