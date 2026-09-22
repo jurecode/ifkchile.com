@@ -4,80 +4,80 @@
             "id": "hispania",
             "nombre": "Hispania",
             "rubro": "Refrigeración",
-            "archivo": ""
+            "archivo": "hispania.png"
         },
         {
             "id": "danfoss",
             "nombre": "Danfoss",
             "rubro": "Refrigeración",
-            "archivo": ""
+            "archivo": "danfoss.png"
         },
         {
             "id": "bitzer",
             "nombre": "Bitzer",
             "rubro": "Refrigeración",
-            "archivo": ""
+            "archivo": "bitzer.png"
         },
         {
             "id": "dorin",
             "nombre": "Dorin",
             "rubro": "Refrigeración",
-            "archivo": ""
+            "archivo": "dorin.png"
         },
         {
             "id": "midea",
             "nombre": "Midea",
             "rubro": "Climatización",
-            "archivo": ""
+            "archivo": "midea.png"
         },
         {
             "id": "hisense",
             "nombre": "Hisense",
             "rubro": "Climatización",
-            "archivo": ""
+            "archivo": "hisense.png"
         },
         {
             "id": "lg",
             "nombre": "LG",
             "rubro": "Climatización",
-            "archivo": ""
+            "archivo": "lg.png"
         },
         {
             "id": "samsung",
             "nombre": "Samsung",
             "rubro": "Climatización",
-            "archivo": ""
+            "archivo": "samsung.png"
         },
         {
             "id": "trane",
             "nombre": "Trane",
             "rubro": "Climatización",
-            "archivo": ""
+            "archivo": "trane.png"
         },
         {
             "id": "sodeca",
             "nombre": "Sodeca",
             "rubro": "Ventilación y extracción",
-            "archivo": ""
+            "archivo": "sodeca.png"
         },
         {
             "id": "soler-y-palau",
             "nombre": "Soler & Palau",
             "rubro": "Ventilación y extracción",
-            "archivo": ""
+            "archivo": "soler-y-palau.png"
         },
         {
             "id": "carrier",
             "nombre": "Carrier",
             "rubro": "Contenedores refrigerados",
-            "archivo": ""
+            "archivo": "carrier.png"
         },
         {
             "id": "thermo-king",
             "nombre": "Thermo King",
             "rubro": "Contenedores refrigerados",
-            "archivo": ""
+            "archivo": "thermo-king.png"
         }
     ],
-    "actualizado": "2026-09-22T22:46:29+00:00"
+    "actualizado": "2026-09-22T22:57:36+00:00"
 }

@@ -257,6 +257,7 @@ function logo_normalizar(string $origen, string $destino): bool {
     $im = @imagecreatefromstring((string)@file_get_contents($origen));
     if (!$im) return false;
 
+    $im = logo_sin_margen($im);
     $w = imagesx($im); $h = imagesy($im);
     $escala = min(LOGO_ANCHO_MAX / $w, LOGO_ALTO_MAX / $h, 1);
     $nw = max(1, (int)round($w * $escala));
@@ -271,6 +272,62 @@ function logo_normalizar(string $origen, string $destino): bool {
     $ok = imagepng($salida, $destino, 8);
     if ($ok) @chmod($destino, 0644);
     return $ok;
+}
+
+/**
+ * Recorta el marco vacío que rodea al logotipo.
+ *
+ * Los archivos llegan con márgenes muy distintos: unos pegados al borde y
+ * otros con un cinturón blanco enorme. Sin esto, dos logos del mismo tamaño
+ * se ven de tamaños distintos en la misma fila. Se mira el color de las
+ * esquinas: lo que sea igual a ese color —o transparente— es marco y se va.
+ */
+function logo_sin_margen($im) {
+    $w = imagesx($im); $h = imagesy($im);
+    if ($w < 12 || $h < 12) return $im;
+
+    /* Las cuatro esquinas tienen que coincidir; si no, no hay marco que sacar. */
+    $esquinas = [imagecolorat($im, 0, 0), imagecolorat($im, $w - 1, 0),
+                 imagecolorat($im, 0, $h - 1), imagecolorat($im, $w - 1, $h - 1)];
+    $fondo = $esquinas[0];
+    foreach ($esquinas as $c) {
+        if (!logo_mismo_color($c, $fondo)) return $im;
+    }
+
+    $es_marco = function (int $x0, int $y0, int $x1, int $y1) use ($im, $fondo): bool {
+        for ($x = $x0; $x <= $x1; $x += max(1, (int)(($x1 - $x0) / 60))) {
+            for ($y = $y0; $y <= $y1; $y += max(1, (int)(($y1 - $y0) / 60))) {
+                if (!logo_mismo_color(imagecolorat($im, $x, $y), $fondo)) return false;
+            }
+        }
+        return true;
+    };
+
+    $arriba = 0;  while ($arriba < $h - 2 && $es_marco(0, $arriba, $w - 1, $arriba)) $arriba++;
+    $abajo  = $h - 1; while ($abajo > $arriba + 2 && $es_marco(0, $abajo, $w - 1, $abajo)) $abajo--;
+    $izq    = 0;  while ($izq < $w - 2 && $es_marco($izq, $arriba, $izq, $abajo)) $izq++;
+    $der    = $w - 1; while ($der > $izq + 2 && $es_marco($der, $arriba, $der, $abajo)) $der--;
+
+    /* Un respiro de 2 px, para no comerse el filo de una letra. */
+    $izq = max(0, $izq - 2); $arriba = max(0, $arriba - 2);
+    $der = min($w - 1, $der + 2); $abajo = min($h - 1, $abajo + 2);
+
+    $nw = $der - $izq + 1; $nh = $abajo - $arriba + 1;
+    if ($nw < 8 || $nh < 8 || ($nw === $w && $nh === $h)) return $im;
+
+    $cortado = imagecrop($im, ['x' => $izq, 'y' => $arriba, 'width' => $nw, 'height' => $nh]);
+    return $cortado ?: $im;
+}
+
+/** Dos colores son "el mismo" si se parecen, o si ambos son transparentes. */
+function logo_mismo_color(int $a, int $b): bool {
+    $aa = ($a >> 24) & 0x7F; $ab = ($b >> 24) & 0x7F;
+    if ($aa > 100 && $ab > 100) return true;          // los dos transparentes
+    if (abs($aa - $ab) > 40) return false;
+    foreach ([16, 8, 0] as $desp) {
+        if (abs((($a >> $desp) & 0xFF) - (($b >> $desp) & 0xFF)) > 14) return false;
+    }
+    return true;
 }
 
 /** Saca el logotipo (la marca se queda en la lista, como nombre). */
