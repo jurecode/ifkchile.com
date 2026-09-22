@@ -132,6 +132,8 @@ require __DIR__ . '/cabeza.php';
 
         </div>
 
+        <input type="hidden" name="sello" value="<?= e(cotizacion_sello()) ?>">
+
         <!-- Campo trampa: escondido para las personas, tentador para los robots. -->
         <div class="trampa" aria-hidden="true">
           <label for="sitio_web">No llenar</label>

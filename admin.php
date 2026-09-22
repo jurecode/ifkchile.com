@@ -6,7 +6,8 @@
  * Mantenimiento) y una caja donde se escribe una palabra.
  * Escribes una palabra y se ejecuta:
  *
- *   estado   → cómo está la carpeta y qué falta por subir
+ *   estado       → cómo está la carpeta y qué falta por subir
+ *   cotizaciones → las solicitudes que llegaron por el formulario
  *   subir    → guarda todo y lo manda a GitHub  (subir arreglé el logo)
  *   traer    → baja de GitHub los cambios nuevos
  *   ayuda    → la lista de palabras
@@ -494,6 +495,46 @@ function palabra_instalar(array $c): array {
         implode("\n\n", $log)];
 }
 
+/**
+ * Las solicitudes que llegaron por el formulario. Se leen del servidor, así
+ * que están aunque el correo no haya salido o haya rebotado.
+ */
+function palabra_cotizaciones(string $resto = ''): array {
+    $carpeta = RAIZ . '/datos/cotizaciones';
+    $archivos = is_dir($carpeta) ? (glob($carpeta . '/*.json') ?: []) : [];
+    if (!$archivos) {
+        return [true, 'Todavía no ha llegado ninguna solicitud por el formulario.', ''];
+    }
+    rsort($archivos);                                   // la más nueva primero
+    $cuantas = max(1, min(50, (int)($resto !== '' ? $resto : 10)));
+    $total   = count($archivos);
+    $l = [];
+
+    foreach (array_slice($archivos, 0, $cuantas) as $f) {
+        $d = json_decode((string)@file_get_contents($f), true);
+        if (!is_array($d)) continue;
+
+        $fecha = isset($d['fecha']) ? date('d-m-Y H:i', strtotime((string)$d['fecha'])) : '';
+        $l[] = str_repeat('─', 56);
+        $l[] = $fecha . '   ' . ($d['servicio_nombre'] ?? '');
+        $l[] = 'Nombre:    ' . ($d['nombre'] ?? '');
+        if (($d['empresa'] ?? '') !== '')   $l[] = 'Empresa:   ' . $d['empresa'] . (($d['rut'] ?? '') !== '' ? '  ·  ' . $d['rut'] : '');
+        $l[] = 'Teléfono:  ' . ($d['telefono'] ?? '');
+        $l[] = 'Correo:    ' . ($d['email'] ?? '');
+        if (($d['ubicacion'] ?? '') !== '') $l[] = 'Ubicación: ' . $d['ubicacion'];
+        if (!empty($d['fotos']))            $l[] = 'Fotos:     ' . implode(', ', (array)$d['fotos']);
+        $l[] = '';
+        $l[] = trim((string)($d['mensaje'] ?? ''));
+        $l[] = '';
+    }
+
+    $aviso = $total === 1
+        ? 'Hay 1 solicitud guardada.'
+        : 'Hay ' . $total . ' solicitudes guardadas; se muestran las ' . min($cuantas, $total) . ' más nuevas.';
+
+    return [true, $aviso, implode("\n", $l)];
+}
+
 function palabra_ayuda(): array {
     return [true, 'Palabras que entiende el panel:', implode("\n", [
         'estado            cómo está la carpeta y qué falta',
@@ -502,6 +543,8 @@ function palabra_ayuda(): array {
         'traer             guarda lo tuyo y baja lo nuevo de GitHub',
         'traer github      deja esta carpeta igual que GitHub (guarda lo de aquí aparte)',
         'instalar          enlaza con GitHub un sitio que ya está en el servidor, sin tocar nada',
+        'cotizaciones      las solicitudes que llegaron por el formulario',
+        'cotizaciones 30   las últimas 30, en vez de las 10 de siempre',
         'ayuda             esta lista',
         'salir             cierra la sesión',
     ])];
@@ -582,6 +625,9 @@ if ($CFG && $_SERVER['REQUEST_METHOD'] === 'POST' && $csrf_ok && $aviso === '') 
                 case 'subir':   [$ok, $aviso, $consola] = palabra_subir($CFG, $resto); break;
                 case 'traer':   [$ok, $aviso, $consola] = palabra_traer($CFG, $resto); break;
                 case 'instalar':[$ok, $aviso, $consola] = palabra_instalar($CFG); break;
+                case 'cotizaciones':
+                case 'cotizacion':
+                                [$ok, $aviso, $consola] = palabra_cotizaciones($resto); break;
                 case 'ayuda':   [$ok, $aviso, $consola] = palabra_ayuda(); break;
                 case 'salir':
                     session_destroy();
@@ -706,7 +752,7 @@ $csrf = $_SESSION['csrf'];
     <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
     <button>Hacer</button>
   </form>
-  <p class="palabras">estado · subir · traer · instalar · ayuda · salir</p>
+  <p class="palabras">estado · subir · traer · instalar · cotizaciones · ayuda · salir</p>
 
   <?php if ($aviso): ?>
     <div class="aviso <?= $ok ? '' : 'mal' ?>"><?= e($aviso) ?></div>

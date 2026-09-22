@@ -133,10 +133,13 @@ if (str_starts_with($ruta, 'servicios/')) {
 
 /* La solicitud de cotización. Si sale bien se responde con una redirección,
    para que al recargar la página no se mande dos veces. */
-if ($ruta === 'contacto' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    require __DIR__ . '/app/cotizacion.php';
-    $envio = cotizacion_recibir($AREAS, $SITE);
-    if ($envio['ok']) llevar_a('/contacto?enviado=' . ($envio['correo'] ? '1' : '2'), 303);
+if ($ruta === 'contacto') {
+    require __DIR__ . '/app/cotizacion.php';   // también al pintar el formulario: lleva un sello
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $envio = cotizacion_recibir($AREAS, $SITE);
+        if ($envio['ok']) llevar_a('/contacto?enviado=' . ($envio['correo'] ? '1' : '2'), 303);
+    }
 }
 
 if ($ruta === 'contacto' && isset($_GET['enviado'])) {
