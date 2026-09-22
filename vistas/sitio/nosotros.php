@@ -24,7 +24,6 @@ require __DIR__ . '/cabeza.php';
 <section class="seccion">
   <div class="env dos">
     <div class="revelar">
-      <p class="eti">La empresa</p>
       <h2 class="tit">Técnicos, no intermediarios</h2>
       <p class="sub">Trabajamos desde Puerto Montt: proyectamos, instalamos, ponemos en marcha
          y mantenemos. Eso nos permite responder rápido cuando algo falla y hacernos cargo del
@@ -47,7 +46,6 @@ require __DIR__ . '/cabeza.php';
 <section class="seccion seccion--oscuro">
   <div class="env">
     <div class="cabeza-seccion revelar">
-      <p class="eti">Lo que nos mueve</p>
       <h2 class="tit">Nuestros valores</h2>
     </div>
     <ul class="valores revelar">

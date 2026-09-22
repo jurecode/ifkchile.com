@@ -13,7 +13,6 @@ require __DIR__ . '/cabeza.php';
   <div class="hero__velo"></div>
   <div class="env">
     <div class="hero__caja">
-      <p class="eti"><?= e($SITE['razon_social']) ?></p>
       <h1>Frío, clima y aire para la industria del sur de Chile
         <em>Refrigeración y HVAC</em></h1>
       <p><?= e($SITE['claim']) ?>. Proyectos, servicio técnico y repuestos con
@@ -58,7 +57,6 @@ require __DIR__ . '/cabeza.php';
 <section class="seccion seccion--nieve">
   <div class="env">
     <div class="cabeza-seccion revelar">
-      <p class="eti">Nuestros servicios</p>
       <h2 class="tit">Cuatro áreas, un solo equipo técnico</h2>
       <p class="sub">Resolvemos temperatura y calidad de aire de principio a fin: el proyecto,
          el montaje, la puesta en marcha, la mantención y los repuestos.</p>
@@ -92,7 +90,6 @@ require __DIR__ . '/cabeza.php';
 <section class="seccion">
   <div class="env">
     <div class="cabeza-seccion revelar">
-      <p class="eti">Cómo trabajamos</p>
       <h2 class="tit">De la visita a terreno a la mantención</h2>
       <p class="sub">El mismo procedimiento en un proyecto industrial y en una casa:
          entender el problema, proponer con números claros y hacernos cargo después.</p>
@@ -112,7 +109,6 @@ require __DIR__ . '/cabeza.php';
 <section class="seccion seccion--oscuro">
   <div class="env dos">
     <div class="revelar">
-      <p class="eti">Nosotros</p>
       <h2 class="tit">Diez años resolviendo frío y clima en el sur</h2>
       <p class="sub">Inversiones Friomak SpA trabaja desde Puerto Montt para la industria
          acuícola, el comercio, la salud y el hogar de las regiones X, XI, XII y XIV,
@@ -138,7 +134,6 @@ require __DIR__ . '/cabeza.php';
 <section class="seccion">
   <div class="env">
     <div class="cabeza-seccion revelar">
-      <p class="eti">Proyectos</p>
       <h2 class="tit">Trabajos realizados</h2>
       <p class="sub">Instalaciones y puestas en marcha en hotelería, salud y gastronomía del sur de Chile.</p>
     </div>
@@ -163,7 +158,6 @@ require __DIR__ . '/cabeza.php';
 <section class="seccion seccion--nieve">
   <div class="env">
     <div class="cabeza-seccion revelar">
-      <p class="eti">Marcas</p>
       <h2 class="tit">Trabajamos con los fabricantes del rubro</h2>
       <p class="sub">Equipos, repuestos y respaldo técnico de las marcas que la industria ya conoce.</p>
     </div>

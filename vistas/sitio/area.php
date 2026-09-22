@@ -39,7 +39,6 @@ $fondo = function () use (&$n_seccion): string { return (++$n_seccion % 2 === 0)
 <section class="seccion<?= $fondo() ?>">
   <div class="env dos">
     <div class="revelar">
-      <p class="eti">Qué hacemos</p>
       <h2 class="tit">Servicios del área</h2>
       <ul class="lista-check" style="margin-top:20px">
         <?php foreach ($A['servicios'] as $s): ?>
@@ -73,7 +72,6 @@ $fondo = function () use (&$n_seccion): string { return (++$n_seccion % 2 === 0)
 <section class="seccion<?= $fondo() ?>">
   <div class="env">
     <div class="cabeza-seccion revelar">
-      <p class="eti">Cómo funciona</p>
       <h2 class="tit"><?= e($A['esquema']['titulo']) ?></h2>
       <p class="sub"><?= e($A['esquema']['bajada']) ?></p>
     </div>
@@ -88,7 +86,6 @@ $fondo = function () use (&$n_seccion): string { return (++$n_seccion % 2 === 0)
 <section class="seccion<?= $fondo() ?>">
   <div class="env">
     <div class="cabeza-seccion revelar">
-      <p class="eti"><?= e($g['eti']) ?></p>
       <h2 class="tit"><?= e($g['titulo']) ?></h2>
       <p class="sub"><?= e($g['bajada']) ?></p>
     </div>
@@ -110,7 +107,6 @@ $fondo = function () use (&$n_seccion): string { return (++$n_seccion % 2 === 0)
 <section class="seccion<?= $fondo() ?>">
   <div class="env">
     <div class="cabeza-seccion revelar">
-      <p class="eti">Proyectos</p>
       <h2 class="tit">Trabajos de esta área</h2>
     </div>
     <ul class="proyectos">

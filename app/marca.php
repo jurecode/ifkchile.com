@@ -56,7 +56,6 @@ $AREAS = [
         'marcas'    => ['Hispania', 'Danfoss', 'Bitzer', 'Dorin'],
         'galeria'   => [
             'tipo'   => 'fotos',
-            'eti'    => 'Nuestro trabajo',
             'titulo' => 'Cámaras montadas por nosotros',
             'bajada' => 'Paneles, puertas, evaporadores y unidades condensadoras instalados y en marcha.',
             'fotos'  => [
@@ -94,7 +93,6 @@ $AREAS = [
         'marcas'    => ['Midea', 'Hisense', 'LG', 'Samsung', 'Trane'],
         'galeria'   => [
             'tipo'   => 'equipos',
-            'eti'    => 'Equipos',
             'titulo' => 'Lo que vendemos e instalamos',
             'bajada' => 'Trabajamos con las líneas completas de nuestras marcas: muro, ducto, '
                       . 'cassette, piso-cielo, consola y sistemas multisplit.',
@@ -131,7 +129,6 @@ $AREAS = [
         'marcas'    => ['Sodeca', 'Soler & Palau'],
         'galeria'   => [
             'tipo'   => 'esquemas',
-            'eti'    => 'Cómo funciona',
             'titulo' => 'Tratamiento y renovación de aire',
             'bajada' => 'El aire se toma, se filtra, se acondiciona y se reparte; el viciado se extrae. '
                       . 'De ese equilibrio dependen la humedad, los olores y el cumplimiento normativo.',
@@ -165,7 +162,6 @@ $AREAS = [
         'marcas'    => ['Carrier', 'Thermo King'],
         'galeria'   => [
             'tipo'   => 'fotos',
-            'eti'    => 'Los equipos',
             'titulo' => 'Contenedores que arrendamos',
             'bajada' => 'Unidades de 40 pies con control de temperatura, listas para operar en faena, '
                       . 'planta o patio.',

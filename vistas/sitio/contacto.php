@@ -34,7 +34,6 @@ require __DIR__ . '/cabeza.php';
   <div class="env contacto">
 
     <div class="revelar">
-      <p class="eti">Contacto directo</p>
       <h2 class="tit">Escríbenos</h2>
       <p class="sub">Si prefieres, escríbenos por WhatsApp o al correo y seguimos por ahí.</p>
 

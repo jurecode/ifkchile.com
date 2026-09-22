@@ -11,7 +11,6 @@ require __DIR__ . '/cabeza.php';
   <div class="hero__velo"></div>
   <div class="env">
     <div class="hero__caja">
-      <p class="eti">Error 404</p>
       <h1>Esta página no existe</h1>
       <p>Puede que la dirección haya cambiado. Desde el inicio llegas a todo,
          o escríbenos y te ayudamos.</p>
@@ -26,7 +25,6 @@ require __DIR__ . '/cabeza.php';
 <section class="seccion">
   <div class="env">
     <div class="cabeza-seccion">
-      <p class="eti">Servicios</p>
       <h2 class="tit">Nuestras cuatro áreas</h2>
     </div>
     <ul class="hero__areas" style="margin:0">
