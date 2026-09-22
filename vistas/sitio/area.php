@@ -12,6 +12,10 @@ require __DIR__ . '/cabeza.php';
 
 /* Proyectos donde participó esta área. */
 $suyos = array_values(array_filter($PROYECTOS, fn(array $p): bool => str_contains($p['area'], explode(' ', $A['nombre'])[0])));
+
+/* Las secciones alternan fondo blanco y fondo nieve, sea cual sea el área. */
+$n_seccion = 0;
+$fondo = function () use (&$n_seccion): string { return (++$n_seccion % 2 === 0) ? ' seccion--nieve' : ''; };
 ?>
 
 <section class="hero hero--corto">
@@ -32,7 +36,7 @@ $suyos = array_values(array_filter($PROYECTOS, fn(array $p): bool => str_contain
   </div>
 </section>
 
-<section class="seccion">
+<section class="seccion<?= $fondo() ?>">
   <div class="env dos">
     <div class="revelar">
       <p class="eti">Qué hacemos</p>
@@ -66,7 +70,7 @@ $suyos = array_values(array_filter($PROYECTOS, fn(array $p): bool => str_contain
 </section>
 
 <?php if (!empty($A['esquema'])): ?>
-<section class="seccion seccion--nieve">
+<section class="seccion<?= $fondo() ?>">
   <div class="env">
     <div class="cabeza-seccion revelar">
       <p class="eti">Cómo funciona</p>
@@ -80,8 +84,30 @@ $suyos = array_values(array_filter($PROYECTOS, fn(array $p): bool => str_contain
 </section>
 <?php endif; ?>
 
+<?php if (!empty($A['galeria'])): $g = $A['galeria']; ?>
+<section class="seccion<?= $fondo() ?>">
+  <div class="env">
+    <div class="cabeza-seccion revelar">
+      <p class="eti"><?= e($g['eti']) ?></p>
+      <h2 class="tit"><?= e($g['titulo']) ?></h2>
+      <p class="sub"><?= e($g['bajada']) ?></p>
+    </div>
+    <ul class="galeria galeria--<?= e($g['tipo']) ?>">
+      <?php foreach ($g['fotos'] as $f): ?>
+        <li class="revelar">
+          <figure>
+            <img src="<?= asset($f['archivo']) ?>" alt="<?= e($f['pie']) ?>" loading="lazy">
+            <figcaption><?= e($f['pie']) ?></figcaption>
+          </figure>
+        </li>
+      <?php endforeach; ?>
+    </ul>
+  </div>
+</section>
+<?php endif; ?>
+
 <?php if ($suyos): ?>
-<section class="seccion<?= empty($A['esquema']) ? ' seccion--nieve' : '' ?>">
+<section class="seccion<?= $fondo() ?>">
   <div class="env">
     <div class="cabeza-seccion revelar">
       <p class="eti">Proyectos</p>
@@ -106,7 +132,7 @@ $suyos = array_values(array_filter($PROYECTOS, fn(array $p): bool => str_contain
 </section>
 <?php endif; ?>
 
-<section class="seccion">
+<section class="seccion<?= $fondo() ?>">
   <div class="env">
     <div class="banda revelar">
       <div>

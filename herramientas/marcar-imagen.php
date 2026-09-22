@@ -3,10 +3,12 @@
  * Prepara una fotografía para el sitio: la reduce, la guarda liviana y le
  * estampa el logo de IFK.
  *
- *   php herramientas/marcar-imagen.php entrada.jpg assets/img/salida.jpg [esquina] [ancho]
+ *   php herramientas/marcar-imagen.php entrada.jpg assets/img/salida.jpg [esquina] [ancho] [recorte]
  *
  *   esquina: sup-der (por defecto), sup-izq, inf-der, inf-izq
  *   ancho:   ancho máximo de la imagen final, en píxeles (1600 por defecto)
+ *   recorte: "x,y,ancho,alto" sobre la imagen original; sirve para cortar la
+ *            franja donde otra empresa dejó su sello
  *
  * Se usa cada vez que llega una foto nueva del cliente, para que todas salgan
  * iguales: mismo tamaño, mismo peso y el logo en el mismo lugar.
@@ -17,6 +19,7 @@ $entrada = $argv[1] ?? '';
 $salida  = $argv[2] ?? '';
 $esquina = $argv[3] ?? 'sup-der';
 $ancho   = (int)($argv[4] ?? 1600);
+$recorte = $argv[5] ?? '';
 
 if ($entrada === '' || $salida === '') {
     fwrite(STDERR, "Uso: php herramientas/marcar-imagen.php entrada.jpg salida.jpg [esquina] [ancho]\n");
@@ -26,7 +29,15 @@ if ($entrada === '' || $salida === '') {
 $foto = @imagecreatefromstring((string)@file_get_contents($entrada));
 if (!$foto) { fwrite(STDERR, "No pude abrir $entrada\n"); exit(1); }
 
-/* 1. Reducir, si hace falta. */
+/* 1. Recortar, si se pidió. */
+if ($recorte !== '') {
+    [$rx, $ry, $rw, $rh] = array_map('intval', array_pad(explode(',', $recorte), 4, 0));
+    $cortada = imagecrop($foto, ['x' => $rx, 'y' => $ry, 'width' => $rw, 'height' => $rh]);
+    if ($cortada === false) { fwrite(STDERR, "Recorte inválido\n"); exit(1); }
+    $foto = $cortada;
+}
+
+/* 2. Reducir, si hace falta. */
 $w = imagesx($foto); $h = imagesy($foto);
 if ($w > $ancho) {
     $nh = (int)round($h * $ancho / $w);
@@ -35,7 +46,7 @@ if ($w > $ancho) {
     $foto = $chico; $w = $ancho; $h = $nh;
 }
 
-/* 2. El logo, al 11% del ancho de la foto. */
+/* 3. El logo, al 11% del ancho de la foto. */
 $logo = @imagecreatefromwebp(__DIR__ . '/../assets/img/ifk_logo.webp');
 if (!$logo) { fwrite(STDERR, "No encontré assets/img/ifk_logo.webp\n"); exit(1); }
 $lw = (int)round($w * 0.11);
@@ -47,7 +58,7 @@ imagesavealpha($marca, true);
 imagefill($marca, 0, 0, imagecolorallocatealpha($marca, 0, 0, 0, 127));
 imagecopyresampled($marca, $logo, 0, 0, 0, 0, $lw, $lh, imagesx($logo), imagesy($logo));
 
-/* 3. Dónde va. El margen es proporcional, para que se vea igual en toda foto. */
+/* 4. Dónde va. El margen es proporcional, para que se vea igual en toda foto. */
 $m = (int)round($w * 0.025);
 [$x, $y] = match ($esquina) {
     'sup-izq' => [$m, $m],
@@ -56,11 +67,11 @@ $m = (int)round($w * 0.025);
     default   => [$w - $lw - $m, $m],          // sup-der
 };
 
-/* 4. Estampar, con algo de transparencia para que no tape la foto. */
+/* 5. Estampar, con algo de transparencia para que no tape la foto. */
 imagealphablending($foto, true);
 imagecopymerge_alpha($foto, $marca, $x, $y, 78);
 
-/* 5. Guardar. */
+/* 6. Guardar. */
 $ok = str_ends_with(strtolower($salida), '.png')
     ? imagepng($foto, $salida, 8)
     : imagejpeg($foto, $salida, 82);

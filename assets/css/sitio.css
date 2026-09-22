@@ -220,6 +220,27 @@ p:last-child{margin-bottom:0}
 }
 .esquema img{width:100%;min-width:680px;height:auto}
 
+/* ---------------- Galería de un área ---------------- */
+
+.galeria{display:grid;gap:clamp(14px,2vw,22px);grid-template-columns:repeat(3,1fr)}
+.galeria li{margin:0}
+.galeria figure{
+  display:flex;flex-direction:column;height:100%;margin:0;overflow:hidden;
+  background:#fff;border:1px solid var(--linea-clara);border-radius:20px;box-shadow:var(--sombra);
+  transition:transform .3s ease,box-shadow .3s ease;
+}
+.galeria figure:hover{transform:translateY(-4px);box-shadow:0 34px 70px -34px rgba(9,30,54,.6)}
+.galeria img{width:100%;display:block;background:#fff}
+.galeria figcaption{padding:14px 18px 17px;font-size:.88rem;line-height:1.5;color:var(--tinta-suave)}
+
+.galeria--fotos img{aspect-ratio:4/3;object-fit:cover}
+.galeria--equipos img{aspect-ratio:4/3;object-fit:contain;padding:16px}
+.galeria--esquemas{grid-template-columns:repeat(2,1fr)}
+.galeria--esquemas img{aspect-ratio:16/10;object-fit:contain;padding:12px}
+
+@media (max-width:880px){.galeria{grid-template-columns:1fr 1fr}}
+@media (max-width:620px){.galeria,.galeria--esquemas{grid-template-columns:1fr}}
+
 /* ---------------- Método ---------------- */
 
 .metodo{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(14px,2vw,24px)}

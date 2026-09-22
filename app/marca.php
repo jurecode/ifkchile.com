@@ -54,6 +54,17 @@ $AREAS = [
         'para'      => ['Salmoneras e industria acuícola', 'Supermercados y comercio',
                         'Restaurantes y hoteles', 'Plantas de proceso'],
         'marcas'    => ['Hispania', 'Danfoss', 'Bitzer', 'Dorin'],
+        'galeria'   => [
+            'tipo'   => 'fotos',
+            'eti'    => 'Nuestro trabajo',
+            'titulo' => 'Cámaras montadas por nosotros',
+            'bajada' => 'Paneles, puertas, evaporadores y unidades condensadoras instalados y en marcha.',
+            'fotos'  => [
+                ['archivo' => 'img/areas/refrigeracion-1.jpg', 'pie' => 'Interior de cámara con evaporador e iluminación estanca.'],
+                ['archivo' => 'img/areas/refrigeracion-2.jpg', 'pie' => 'Panel de cielo y marco de puerta frigorífica terminados.'],
+                ['archivo' => 'img/areas/refrigeracion-3.jpg', 'pie' => 'Cámaras modulares con las unidades condensadoras afuera.'],
+            ],
+        ],
         'esquema'   => [
             'archivo' => 'img/camara-frigorifica.svg',
             'titulo'  => 'Las partes de una cámara frigorífica',
@@ -81,6 +92,21 @@ $AREAS = [
         'para'      => ['Clínicas y centros de salud', 'Oficinas y edificios corporativos',
                         'Retail y centros comerciales', 'Viviendas particulares'],
         'marcas'    => ['Midea', 'Hisense', 'LG', 'Samsung', 'Trane'],
+        'galeria'   => [
+            'tipo'   => 'equipos',
+            'eti'    => 'Equipos',
+            'titulo' => 'Lo que vendemos e instalamos',
+            'bajada' => 'Trabajamos con las líneas completas de nuestras marcas: muro, ducto, '
+                      . 'cassette, piso-cielo, consola y sistemas multisplit.',
+            'fotos'  => [
+                ['archivo' => 'img/areas/climatizacion-1.jpg', 'pie' => 'Sistema multisplit Hisense con sus unidades interiores.'],
+                ['archivo' => 'img/areas/climatizacion-2.jpg', 'pie' => 'Split muro Hisense con su unidad exterior.'],
+                ['archivo' => 'img/areas/climatizacion-3.jpg', 'pie' => 'Sistema Midea: ducto, cassette, muro y piso-cielo sobre un mismo equipo.'],
+                ['archivo' => 'img/areas/climatizacion-4.jpg', 'pie' => 'Multisplit Midea con control centralizado.'],
+                ['archivo' => 'img/areas/climatizacion-5.jpg', 'pie' => 'Consola Midea Xtreme Heat, para calefacción en climas fríos.'],
+                ['archivo' => 'img/areas/climatizacion-6.jpg', 'pie' => 'Multisplit LG Artcool Mirror: cuatro unidades interiores con un solo equipo exterior.'],
+            ],
+        ],
     ],
     'ventilacion' => [
         'nombre'    => 'Ventilación y extracción',
@@ -103,6 +129,17 @@ $AREAS = [
         'para'      => ['Restaurantes y cocinas industriales', 'Plantas productivas',
                         'Bodegas y talleres', 'Instituciones públicas'],
         'marcas'    => ['Sodeca', 'Soler & Palau'],
+        'galeria'   => [
+            'tipo'   => 'esquemas',
+            'eti'    => 'Cómo funciona',
+            'titulo' => 'Tratamiento y renovación de aire',
+            'bajada' => 'El aire se toma, se filtra, se acondiciona y se reparte; el viciado se extrae. '
+                      . 'De ese equilibrio dependen la humedad, los olores y el cumplimiento normativo.',
+            'fotos'  => [
+                ['archivo' => 'img/areas/ventilacion-1.jpg', 'pie' => 'Unidad manejadora de aire: retorno, filtros, serpentines de frío y calor, e inyección.'],
+                ['archivo' => 'img/areas/ventilacion-2.jpg', 'pie' => 'Inyección y extracción en un recinto: en azul el aire limpio, en rojo el viciado.'],
+            ],
+        ],
     ],
     'contenedores-refrigerados' => [
         'nombre'    => 'Contenedores refrigerados',
@@ -126,5 +163,19 @@ $AREAS = [
         'para'      => ['Industria acuícola y pesquera', 'Agroindustria',
                         'Eventos y contingencias', 'Operadores logísticos'],
         'marcas'    => ['Carrier', 'Thermo King'],
+        'galeria'   => [
+            'tipo'   => 'fotos',
+            'eti'    => 'Los equipos',
+            'titulo' => 'Contenedores que arrendamos',
+            'bajada' => 'Unidades de 40 pies con control de temperatura, listas para operar en faena, '
+                      . 'planta o patio.',
+            'fotos'  => [
+                ['archivo' => 'img/areas/contenedores-1.jpg', 'pie' => 'Contenedor refrigerado de 40 pies, listo para operar.'],
+                ['archivo' => 'img/areas/contenedores-2.jpg', 'pie' => 'Unidad en patio, antes del traslado.'],
+                ['archivo' => 'img/areas/contenedores-3.jpg', 'pie' => 'Frente del equipo de frío, con su registro de temperatura.'],
+                ['archivo' => 'img/areas/contenedores-4.jpg', 'pie' => 'Contenedores conectados y en temperatura.'],
+                ['archivo' => 'img/areas/contenedores-5.jpg', 'pie' => 'Equipos de frío en funcionamiento.'],
+            ],
+        ],
     ],
 ];
