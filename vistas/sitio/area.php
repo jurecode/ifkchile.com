@@ -113,7 +113,7 @@ $fondo = function () use (&$n_seccion): string { return (++$n_seccion % 2 === 0)
 </section>
 <?php endif; ?>
 
-<?php if ($suyos): ?>
+<?php if ($suyos && MOSTRAR_PROYECTOS): ?>
 <section class="seccion<?= $fondo() ?>">
   <div class="env">
     <div class="cabeza-seccion revelar">

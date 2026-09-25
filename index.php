@@ -53,7 +53,8 @@ if ($ruta === 'sitemap.xml') {
     if (estado_sitio() !== 'publicado') { http_response_code(404); exit; }
 
     $base  = rtrim($SITE['dominio'], '/');
-    $rutas = ['/', '/servicios', '/proyectos', '/marcas', '/nosotros', '/contacto'];
+    $rutas = ['/', '/servicios', '/marcas', '/nosotros', '/contacto'];
+    if (MOSTRAR_PROYECTOS) $rutas[] = '/proyectos';
     foreach (array_keys($AREAS) as $llave) $rutas[] = '/servicios/' . $llave;
 
     header('Content-Type: application/xml; charset=utf-8');

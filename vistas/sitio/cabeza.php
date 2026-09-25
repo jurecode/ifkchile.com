@@ -88,7 +88,9 @@ $canon   = rtrim($SITE['dominio'], '/') . ($aqui === '/' ? '/' : $aqui);
         </span>
       </span>
 
-      <a href="/proyectos"<?= $aqui === '/proyectos' ? ' class="activo"' : '' ?>>Proyectos</a>
+      <?php if (MOSTRAR_PROYECTOS): ?>
+        <a href="/proyectos"<?= $aqui === '/proyectos' ? ' class="activo"' : '' ?>>Proyectos</a>
+      <?php endif; ?>
       <a href="/marcas"<?= $aqui === '/marcas' ? ' class="activo"' : '' ?>>Marcas</a>
       <a href="/nosotros"<?= $aqui === '/nosotros' ? ' class="activo"' : '' ?>>Nosotros</a>
       <a href="/contacto"<?= $aqui === '/contacto' ? ' class="activo"' : '' ?>>Contacto</a>

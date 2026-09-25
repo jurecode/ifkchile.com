@@ -60,7 +60,7 @@ $AREAS = [
             'bajada' => 'Paneles, puertas, evaporadores y unidades condensadoras instalados y en marcha.',
             'fotos'  => [
                 ['archivo' => 'img/areas/refrigeracion-1.jpg', 'pie' => 'Interior de cámara con evaporador e iluminación estanca.'],
-                ['archivo' => 'img/areas/refrigeracion-2.jpg', 'pie' => 'Panel de cielo y marco de puerta frigorífica terminados.'],
+                ['archivo' => 'img/areas/refrigeracion-2.jpg', 'pie' => 'Cámara frigorífica modular, con puerta y cortina de bandas.'],
                 ['archivo' => 'img/areas/refrigeracion-3.jpg', 'pie' => 'Cámaras modulares con las unidades condensadoras afuera.'],
             ],
         ],

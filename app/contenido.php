@@ -28,6 +28,15 @@ $METODO = [
     ['n' => '04', 't' => 'Mantención y respaldo', 'd' => 'Planes preventivos, repuestos originales y emergencias.'],
 ];
 
+/**
+ * Proyectos queda fuera del sitio mientras el cliente reúne más detalle de
+ * cada trabajo. No se borra nada: la página sigue existiendo y se llega por
+ * su dirección, /proyectos, para mostrarla cuando haga falta.
+ *
+ * Para devolverla al menú basta con poner esto en true.
+ */
+const MOSTRAR_PROYECTOS = false;
+
 /* Proyectos realizados. Se muestran sin nombrar al cliente. */
 $PROYECTOS = [
     [

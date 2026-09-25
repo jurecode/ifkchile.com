@@ -147,7 +147,9 @@ require __DIR__ . '/cabeza.php';
       </ul>
       <div class="hero__botones">
         <a class="btn btn--claro" href="/nosotros">Conoce IFK</a>
-        <a class="btn btn--vidrio" href="/proyectos">Ver proyectos</a>
+        <?php if (MOSTRAR_PROYECTOS): ?>
+          <a class="btn btn--vidrio" href="/proyectos">Ver proyectos</a>
+        <?php endif; ?>
       </div>
     </div>
     <div class="dos__foto revelar">
@@ -157,6 +159,7 @@ require __DIR__ . '/cabeza.php';
   </div>
 </section>
 
+<?php if (MOSTRAR_PROYECTOS): ?>
 <section class="seccion">
   <div class="env">
     <div class="cabeza-seccion revelar">
@@ -180,6 +183,7 @@ require __DIR__ . '/cabeza.php';
     </ul>
   </div>
 </section>
+<?php endif; ?>
 
 <section class="seccion seccion--nieve">
   <div class="env">

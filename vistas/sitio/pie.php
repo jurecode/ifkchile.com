@@ -49,7 +49,7 @@
         <h3>Empresa</h3>
         <ul>
           <li><a href="/nosotros">Nosotros</a></li>
-          <li><a href="/proyectos">Proyectos</a></li>
+          <?php if (MOSTRAR_PROYECTOS): ?><li><a href="/proyectos">Proyectos</a></li><?php endif; ?>
           <li><a href="/marcas">Marcas</a></li>
           <li><a href="/contacto">Contacto</a></li>
         </ul>
