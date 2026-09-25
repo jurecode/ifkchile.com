@@ -8,6 +8,11 @@ DirectoryIndex index.php
   RewriteEngine On
   RewriteBase /
 
+  # /correo lleva al webmail del hosting. Va antes que todo lo demás para que
+  # mande aunque exista una carpeta "correo" en la raíz: si existiera, Apache
+  # la serviría él y esta regla no alcanzaría a correr.
+  RewriteRule ^correo/?$ /webmail [R=302,L]
+
   # Las carpetas internas no se sirven nunca
   RewriteRule ^(app|datos|vistas|contenido)/ - [F,L]
 
