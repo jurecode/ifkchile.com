@@ -52,6 +52,8 @@ if ($ruta === 'robots.txt') {
 if ($ruta === 'sitemap.xml') {
     if (estado_sitio() !== 'publicado') { http_response_code(404); exit; }
 
+    require_once __DIR__ . '/app/contenido.php';   // de ahí sale MOSTRAR_PROYECTOS
+
     $base  = rtrim($SITE['dominio'], '/');
     $rutas = ['/', '/servicios', '/marcas', '/nosotros', '/contacto'];
     if (MOSTRAR_PROYECTOS) $rutas[] = '/proyectos';
