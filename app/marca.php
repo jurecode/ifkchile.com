@@ -79,7 +79,7 @@ $AREAS = [
         'bajada'    => 'Aire acondicionado y bombas de calor: domiciliario, comercial e industrial.',
         'intro'     => 'Proyectos de climatización completos: cálculo, suministro, montaje y mantención '
                      . 'de equipos Split, ducto, cassette, VRF y bombas de calor.',
-        'foto'      => 'img/climatizacion.jpg',
+        'foto'      => 'img/camara-frio.jpg',
         'meta'      => ['Split · VRF', 'Bombas de calor'],
         'servicios' => [
             'Servicio técnico correctivo y preventivo',
