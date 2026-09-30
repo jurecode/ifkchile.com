@@ -109,7 +109,7 @@ p{margin:0}
 .logo{display:inline-flex;transition:transform .25s ease}
 .logo:hover{transform:translateY(-2px)}
 /* El logo va suelto sobre la foto: una sombra suave lo despega del fondo. */
-.logo img{height:clamp(38px,5vw,52px);width:auto;filter:drop-shadow(0 6px 18px rgba(3,16,28,.75))}
+.logo img{height:clamp(44px,5.6vw,60px);width:auto;filter:drop-shadow(0 6px 18px rgba(3,16,28,.75))}
 
 /* ---------------- Centro: el mensaje ---------------- */
 
@@ -248,7 +248,7 @@ h1 em{
 @media (max-width:420px){
   .areas b{font-size:.86rem}
   .areas span{font-size:.7rem}
-  .logo img{height:36px}
+  .logo img{height:40px}
   .btn{padding:14px 22px}
 }
 
