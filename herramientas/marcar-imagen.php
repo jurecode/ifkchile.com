@@ -79,9 +79,14 @@ $m = (int)round($w * 0.025);
     default   => [$w - $lw - $m, $m],          // sup-der
 };
 
-/* 5. Estampar, con algo de transparencia para que no tape la foto. */
+/* 5. Estampar. El logotipo es blanco, así que sobre una foto clara
+      desaparecería: primero va su sombra, apenas marcada, y encima el logo. */
 imagealphablending($foto, true);
-imagecopymerge_alpha($foto, $marca, $x, $y, 78);
+$sombra = logo_sombra($marca);
+foreach ([[1, 2], [-1, 2], [0, 3], [2, 1], [-2, 1], [0, 1]] as [$dx, $dy]) {
+    imagecopymerge_alpha($foto, $sombra, $x + $dx, $y + $dy, 20);
+}
+imagecopymerge_alpha($foto, $marca, $x, $y, 86);
 
 /* 6. Guardar. */
 $ok = str_ends_with(strtolower($salida), '.png')
@@ -90,6 +95,26 @@ $ok = str_ends_with(strtolower($salida), '.png')
 
 if (!$ok) { fwrite(STDERR, "No pude escribir $salida\n"); exit(1); }
 printf("%s  ·  %dx%d  ·  %d KB\n", $salida, $w, $h, (int)round(filesize($salida) / 1024));
+
+/**
+ * La silueta del logotipo en negro, con su misma transparencia. Puesta varias
+ * veces con poca opacidad y desplazada unos píxeles, hace de sombra blanda:
+ * es lo que permite que un logotipo blanco se lea sobre una foto clara sin
+ * dibujarle una caja encima.
+ */
+function logo_sombra($logo) {
+    $w = imagesx($logo); $h = imagesy($logo);
+    $s = imagecreatetruecolor($w, $h);
+    imagealphablending($s, false);
+    imagesavealpha($s, true);
+    for ($x = 0; $x < $w; $x++) {
+        for ($y = 0; $y < $h; $y++) {
+            $a = (imagecolorat($logo, $x, $y) >> 24) & 0x7F;
+            imagesetpixel($s, $x, $y, $a << 24);        // negro, misma transparencia
+        }
+    }
+    return $s;
+}
 
 /**
  * imagecopymerge() pierde la transparencia del PNG/WEBP; esta versión la
