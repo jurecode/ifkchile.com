@@ -40,6 +40,31 @@
     });
   }
 
+  /* La cinta de marcas: se arrastra con el dedo o el trackpad, y las flechas
+     hacen lo mismo de a una pantalla. Las flechas se apagan en los extremos. */
+  document.querySelectorAll('.cinta').forEach(function (cinta) {
+    var pista = cinta.querySelector('.cinta__pista');
+    var izq   = cinta.querySelector('.cinta__flecha--izq');
+    var der   = cinta.querySelector('.cinta__flecha--der');
+    if (!pista || !izq || !der) return;
+
+    function paso() { return Math.max(200, pista.clientWidth * 0.8); }
+
+    izq.addEventListener('click', function () { pista.scrollBy({ left: -paso(), behavior: 'smooth' }); });
+    der.addEventListener('click', function () { pista.scrollBy({ left:  paso(), behavior: 'smooth' }); });
+
+    function extremos() {
+      var resto = pista.scrollWidth - pista.clientWidth;
+      izq.disabled = pista.scrollLeft <= 4;
+      der.disabled = pista.scrollLeft >= resto - 4;
+      /* Si cabe entera, las flechas no pintan nada. */
+      cinta.classList.toggle('cinta--completa', resto <= 4);
+    }
+    pista.addEventListener('scroll', extremos, { passive: true });
+    window.addEventListener('resize', extremos);
+    extremos();
+  });
+
   /* Las secciones aparecen al llegar a ellas. */
   var piezas = document.querySelectorAll('.revelar');
   if (!('IntersectionObserver' in window)) {

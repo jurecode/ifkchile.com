@@ -285,49 +285,53 @@ p:last-child{margin-bottom:0}
 .marcas ul li{padding:8px 15px;border-radius:999px;background:var(--nieve);
               font-weight:700;font-size:.9rem;color:var(--tinta)}
 
-/* ---------------- Desfile de logotipos ---------------- */
+/* ---------------- Cinta de logotipos ---------------- */
 
-/* Va pegada bajo la portada, así que es más baja que una sección normal. */
-.seccion--cinta{padding:clamp(26px,3.4vw,44px) 0}
+/* Va sobre fondo blanco a propósito: los archivos llegan con fondos distintos
+   —unos transparentes, otros blancos— y sobre blanco todos se funden igual. */
+.seccion--cinta{padding:clamp(26px,3.4vw,44px) 0;background:#fff}
 .cinta-titulo{
   display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;
-  margin:0 0 clamp(16px,2vw,24px);color:var(--tinta-suave);font-size:.95rem;
+  margin:0 0 clamp(14px,1.8vw,20px);color:var(--tinta-suave);font-size:.95rem;
 }
 .cinta-titulo a{color:var(--azul-hondo);font-weight:700}
 .cinta-titulo a::after{content:' →'}
 .cinta-titulo a:hover{text-decoration:underline;text-underline-offset:3px}
 
-/* Una cinta que avanza sola y se detiene al pasarle el mouse. Los bordes se
-   desvanecen para que los logos no aparezcan cortados de golpe. */
-.desfile{
-  position:relative;overflow:hidden;padding:6px 0;
-  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%);
-          mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%);
-}
-.desfile__pista{display:flex;width:max-content;animation:desfilar 42s linear infinite}
-.desfile:hover .desfile__pista,
-.desfile:focus-within .desfile__pista{animation-play-state:paused}
-@keyframes desfilar{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.desfile__grupo{
-  display:flex;align-items:center;flex:none;
-  gap:clamp(40px,6vw,86px);padding-right:clamp(40px,6vw,86px);
-}
+.cinta{position:relative;display:flex;align-items:center;gap:10px}
 
-/* Cada logotipo vive en una caja del mismo tamaño y se acomoda dentro, entero
-   y centrado. Da lo mismo que venga cuadrado, apaisado o muy alargado. */
+/* La pista se arrastra con el dedo o el trackpad; las flechas hacen lo mismo. */
+.cinta__pista{
+  display:flex;align-items:center;flex:1;min-width:0;
+  gap:clamp(24px,3.4vw,54px);margin:0;padding:8px 2px;
+  overflow-x:auto;scroll-behavior:smooth;scroll-snap-type:x proximity;
+  overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.cinta__pista::-webkit-scrollbar{display:none}
+.cinta__pista li{flex:none;scroll-snap-align:center}
+.cinta__pista:focus-visible{outline:2px solid var(--azul);outline-offset:4px;border-radius:14px}
+
+/* Las flechas sólo aparecen si el JS está vivo, que es quien las mueve. */
+.cinta__flecha{display:none}
+.js .cinta__flecha{
+  display:grid;place-items:center;flex:none;width:44px;height:44px;padding:0;
+  border:0;border-radius:50%;background:#fff;color:var(--tinta);cursor:pointer;
+  box-shadow:0 10px 26px -14px rgba(9,30,54,.55);
+  transition:opacity .25s ease,transform .2s ease,color .2s ease;
+}
+.js .cinta__flecha:hover{color:var(--azul-hondo);transform:scale(1.07)}
+.js .cinta__flecha svg{width:18px;height:18px}
+.js .cinta__flecha[disabled]{opacity:.25;cursor:default;transform:none}
+/* Si las marcas caben todas, las flechas sobran. */
+.js .cinta--completa .cinta__flecha{display:none}
+
+/* Cada logotipo, en una caja del mismo tamaño: entra entero y centrado, venga
+   cuadrado, apaisado o muy alargado. */
 .marca{
   display:flex;align-items:center;justify-content:center;flex:none;
-  width:clamp(132px,15vw,196px);height:clamp(56px,6.2vw,78px);
+  width:clamp(128px,14vw,180px);height:clamp(56px,6vw,76px);
 }
-
-/* En la cinta van sobre una placa blanca: los archivos vienen con fondos
-   distintos —unos transparentes, otros blancos— y así la fila queda pareja. */
-.desfile .marca{
-  width:clamp(146px,16vw,210px);height:clamp(72px,7.4vw,92px);
-  padding:12px 20px;border-radius:16px;background:#fff;
-  box-shadow:0 14px 34px -22px rgba(9,30,54,.55);
-}
-.desfile .marca--texto{padding:0 clamp(20px,2.2vw,28px)}
 .marca img{
   max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;
   filter:grayscale(1) contrast(.92) opacity(.62);
@@ -337,29 +341,21 @@ p:last-child{margin-bottom:0}
 
 /* Marca sin logotipo todavía: su nombre, para que la fila nunca quede coja. */
 .marca--texto{
-  width:auto;padding:0 clamp(18px,2vw,26px);border-radius:999px;background:#fff;box-shadow:var(--sombra);
-  font-weight:700;font-size:clamp(.95rem,1.2vw,1.08rem);color:var(--tinta-suave);white-space:nowrap;
-  transition:color .3s ease,transform .3s ease;
+  width:auto;padding:0 clamp(14px,1.6vw,20px);
+  font-weight:700;font-size:clamp(.95rem,1.2vw,1.05rem);color:var(--tinta-suave);
+  white-space:nowrap;transition:color .3s ease;
 }
-.marca--texto:hover{color:var(--azul-hondo);transform:scale(1.04)}
+.marca--texto:hover{color:var(--azul-hondo)}
 
-/* En el teléfono no hay "pasar el mouse": ahí se muestran casi a color. */
+/* En el teléfono no existe "pasar el mouse": ahí se muestran casi a color. */
 @media (hover:none){
   .marca img{filter:grayscale(.2) opacity(.92)}
 }
 
-/* Quien pidió menos movimiento ve la misma fila, quieta y ordenada. */
-@media (prefers-reduced-motion:reduce){
-  .desfile{-webkit-mask-image:none;mask-image:none}
-  .desfile__pista{animation:none;width:100%}
-  .desfile__grupo{flex-wrap:wrap;justify-content:center;gap:clamp(26px,4vw,52px);padding-right:0}
-  .desfile__grupo[aria-hidden="true"]{display:none}
+@media (max-width:620px){
+  .js .cinta__flecha{width:38px;height:38px}
+  .cinta__pista{gap:22px}
 }
-
-/* Las marcas dentro de la tarjeta de un área */
-.marcas-area{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px}
-.marcas-area .marca{width:118px;height:46px}
-.marcas-area .marca--texto{height:auto;padding:7px 14px;font-size:.88rem;background:var(--nieve);box-shadow:none}
 
 /* ---------------- Logotipos en rejilla (página Marcas) ---------------- */
 

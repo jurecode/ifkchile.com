@@ -40,16 +40,21 @@ require __DIR__ . '/cabeza.php';
   </div>
 </section>
 
-<section class="seccion seccion--cinta seccion--nieve">
+<section class="seccion seccion--cinta">
   <div class="env">
     <p class="cinta-titulo revelar">Trabajamos con los fabricantes del rubro
        <a href="/marcas">Ver todas las marcas</a></p>
-  <div class="desfile revelar">
-    <div class="desfile__pista">
-      <?php /* la fila va dos veces: así el desfile vuelve a empezar sin saltos */ ?>
-      <?php for ($vuelta = 0; $vuelta < 2; $vuelta++): ?>
-        <div class="desfile__grupo"<?= $vuelta ? ' aria-hidden="true"' : '' ?>>
-          <?php foreach (marcas_listar() as $m): ?>
+    <div class="cinta revelar">
+      <button class="cinta__flecha cinta__flecha--izq" type="button"
+              aria-label="Ver marcas anteriores" aria-controls="cinta-marcas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+
+      <ul class="cinta__pista" id="cinta-marcas" tabindex="0"
+          aria-label="Marcas con las que trabajamos">
+        <?php foreach (marcas_listar() as $m): ?>
+          <li>
             <?php if ($m['archivo'] !== '' && is_file(CARPETA_LOGOS . '/' . $m['archivo'])): ?>
               <span class="marca">
                 <img src="<?= asset('img/marcas/' . $m['archivo']) ?>"
@@ -58,11 +63,16 @@ require __DIR__ . '/cabeza.php';
             <?php else: ?>
               <span class="marca marca--texto"><?= e($m['nombre']) ?></span>
             <?php endif; ?>
-          <?php endforeach; ?>
-        </div>
-      <?php endfor; ?>
+          </li>
+        <?php endforeach; ?>
+      </ul>
+
+      <button class="cinta__flecha cinta__flecha--der" type="button"
+              aria-label="Ver más marcas" aria-controls="cinta-marcas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
     </div>
-  </div>
   </div>
 </section>
 
