@@ -300,16 +300,27 @@ p:last-child{margin-bottom:0}
 
 .cinta{position:relative;display:flex;align-items:center;gap:10px}
 
-/* La pista se arrastra con el dedo o el trackpad; las flechas hacen lo mismo. */
+/* La pista se arrastra con el dedo o el trackpad, y además corre sola.
+   Sin scroll-snap ni scroll-behavior: los dos pelean con el avance continuo
+   —el primero devuelve la cinta al logo más cercano, el segundo convierte
+   cada paso del reloj en una animación aparte—. */
 .cinta__pista{
   display:flex;align-items:center;flex:1;min-width:0;
   gap:clamp(24px,3.4vw,54px);margin:0;padding:8px 2px;
-  overflow-x:auto;scroll-behavior:smooth;scroll-snap-type:x proximity;
-  overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;
+  overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;
+  touch-action:pan-x;                /* el dedo arrastra de lado, no selecciona */
   scrollbar-width:none;
 }
 .cinta__pista::-webkit-scrollbar{display:none}
-.cinta__pista li{flex:none;scroll-snap-align:center}
+.cinta__pista li{flex:none}
+
+/* El dedo tiene que agarrar la cinta, no la imagen: sin arrastre de imagen,
+   sin selección y sin el menú que aparece al mantener apretado. */
+.cinta,.cinta img{
+  user-select:none;-webkit-user-select:none;
+  -webkit-touch-callout:none;-webkit-user-drag:none;
+}
+.cinta img{pointer-events:none}
 .cinta__pista:focus-visible{outline:2px solid var(--azul);outline-offset:4px;border-radius:14px}
 
 /* Las flechas sólo aparecen si el JS está vivo, que es quien las mueve. */
@@ -322,7 +333,6 @@ p:last-child{margin-bottom:0}
 }
 .js .cinta__flecha:hover{color:var(--azul-hondo);transform:scale(1.07)}
 .js .cinta__flecha svg{width:18px;height:18px}
-.js .cinta__flecha[disabled]{opacity:.25;cursor:default;transform:none}
 /* Si las marcas caben todas, las flechas sobran. */
 .js .cinta--completa .cinta__flecha{display:none}
 

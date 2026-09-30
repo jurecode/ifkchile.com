@@ -53,18 +53,21 @@ require __DIR__ . '/cabeza.php';
 
       <ul class="cinta__pista" id="cinta-marcas" tabindex="0"
           aria-label="Marcas con las que trabajamos">
-        <?php foreach (marcas_listar() as $m): ?>
-          <li>
-            <?php if ($m['archivo'] !== '' && is_file(CARPETA_LOGOS . '/' . $m['archivo'])): ?>
-              <span class="marca">
-                <img src="<?= asset('img/marcas/' . $m['archivo']) ?>"
-                     alt="<?= e($m['nombre']) ?>" loading="lazy">
-              </span>
-            <?php else: ?>
-              <span class="marca marca--texto"><?= e($m['nombre']) ?></span>
-            <?php endif; ?>
-          </li>
-        <?php endforeach; ?>
+        <?php /* la fila va dos veces: así la cinta vuelve a empezar sin saltos */ ?>
+        <?php for ($vuelta = 0; $vuelta < 2; $vuelta++): ?>
+          <?php foreach (marcas_listar() as $m): ?>
+            <li<?= $vuelta ? ' aria-hidden="true"' : '' ?>>
+              <?php if ($m['archivo'] !== '' && is_file(CARPETA_LOGOS . '/' . $m['archivo'])): ?>
+                <span class="marca">
+                  <img src="<?= asset('img/marcas/' . $m['archivo']) ?>"
+                       alt="<?= e($m['nombre']) ?>" loading="lazy" draggable="false">
+                </span>
+              <?php else: ?>
+                <span class="marca marca--texto"><?= e($m['nombre']) ?></span>
+              <?php endif; ?>
+            </li>
+          <?php endforeach; ?>
+        <?php endfor; ?>
       </ul>
 
       <button class="cinta__flecha cinta__flecha--der" type="button"
