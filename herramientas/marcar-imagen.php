@@ -5,7 +5,8 @@
  *
  *   php herramientas/marcar-imagen.php entrada.jpg assets/img/salida.jpg [esquina] [ancho] [recorte]
  *
- *   esquina: sup-der (por defecto), sup-izq, inf-der, inf-izq
+ *   esquina: sup-der (por defecto), sup-izq, inf-der, inf-izq, o "sin"
+ *            cuando la foto ya muestra el logo por sí sola
  *   ancho:   ancho máximo de la imagen final, en píxeles (1600 por defecto)
  *   recorte: "x,y,ancho,alto" sobre la imagen original; sirve para cortar la
  *            franja donde otra empresa dejó su sello
@@ -46,7 +47,18 @@ if ($w > $ancho) {
     $foto = $chico; $w = $ancho; $h = $nh;
 }
 
-/* 3. El logo, al 11% del ancho de la foto. */
+/* 3. El logo, al 11% del ancho de la foto. Salvo que se pida sin él: hay
+      fotos donde la marca ya aparece —en la polera de un técnico, por
+      ejemplo— y estamparlo otra vez sobra. */
+if ($esquina === 'sin') {
+    $ok = str_ends_with(strtolower($salida), '.png')
+        ? imagepng($foto, $salida, 8)
+        : imagejpeg($foto, $salida, 86);
+    if (!$ok) { fwrite(STDERR, "No pude escribir $salida\n"); exit(1); }
+    printf("%s  ·  %dx%d  ·  %d KB  ·  sin logo estampado\n", $salida, $w, $h, (int)round(filesize($salida) / 1024));
+    exit(0);
+}
+
 $logo = @imagecreatefromwebp(__DIR__ . '/../assets/img/ifk_logo.webp');
 if (!$logo) { fwrite(STDERR, "No encontré assets/img/ifk_logo.webp\n"); exit(1); }
 $lw = (int)round($w * 0.11);
