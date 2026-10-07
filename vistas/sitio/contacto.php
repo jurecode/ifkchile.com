@@ -40,6 +40,13 @@ require __DIR__ . '/cabeza.php';
       <ul class="datos" style="margin-top:24px">
         <li><i>WhatsApp</i><a href="<?= e(wa_link()) ?>" target="_blank" rel="noopener"><?= e($SITE['telefono']) ?></a></li>
         <li><i>Correo</i><a href="mailto:<?= e($SITE['email']) ?>"><?= e($SITE['email']) ?></a></li>
+        <?php if (!empty($SITE['correos_equipo'])): ?>
+          <li><i>Equipo comercial</i>
+            <?php foreach ($SITE['correos_equipo'] as $c): ?>
+              <a href="mailto:<?= e($c) ?>"><?= e($c) ?></a><br>
+            <?php endforeach; ?>
+          </li>
+        <?php endif; ?>
         <li><i>Dirección</i><?= e($SITE['direccion']) ?></li>
         <li><i>Horario</i><?= e($SITE['horario']) ?> · <?= e($SITE['emergencia']) ?></li>
         <li><i>Cobertura</i><?= e($SITE['cobertura']) ?> · proyectos a nivel nacional</li>

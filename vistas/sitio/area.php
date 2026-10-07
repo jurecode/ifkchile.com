@@ -18,7 +18,7 @@ $n_seccion = 0;
 $fondo = function () use (&$n_seccion): string { return (++$n_seccion % 2 === 0) ? ' seccion--nieve' : ''; };
 ?>
 
-<section class="hero hero--corto">
+<section class="hero hero--corto<?= !empty($A['velo']) ? ' hero--' . e($A['velo']) : '' ?>">
   <img class="hero__foto" src="<?= asset($A['foto']) ?>" alt="" fetchpriority="high">
   <div class="hero__velo"></div>
   <div class="env">

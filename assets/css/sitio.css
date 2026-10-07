@@ -137,6 +137,15 @@ p:last-child{margin-bottom:0}
       color:#fff;overflow:hidden}
 .hero--corto{min-height:min(62svh,560px);align-items:flex-end}
 .hero__foto{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%;z-index:-2}
+/* Cuando el fondo es parte del mensaje —los equipos en el techo, los volcanes
+   detrás— el velo se abre hacia la derecha y sólo oscurece donde va el texto. */
+.hero--paisaje .hero__foto{filter:saturate(1.12) contrast(1.06);object-position:50% 56%}
+.hero--paisaje .hero__velo{
+  background:
+    linear-gradient(100deg,rgba(3,16,28,.93) 0%,rgba(4,21,37,.76) 32%,rgba(6,26,46,.3) 60%,rgba(3,16,28,.16) 100%),
+    linear-gradient(to bottom,rgba(3,16,28,.5) 0%,rgba(3,16,28,0) 40%,rgba(3,16,28,.5) 100%);
+}
+
 /* Fotos tomadas de día: sin esto el velo las deja lavadas. */
 .hero--clara .hero__foto{filter:brightness(.82) contrast(1.08) saturate(1.04)}
 .hero--clara .hero__velo{

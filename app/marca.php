@@ -14,7 +14,9 @@ $SITE = [
     'claim'        => 'Refrigeración, climatización, ventilación y contenedores refrigerados',
     'anios'        => 10,
     'dominio'      => 'https://ifkchile.com',
-    'email'        => 'contacto@ifkchile.com',   // pendiente de confirmar con el cliente
+    'email'        => 'contacto@ifkchile.com',   // el principal: el que se muestra
+    /* Copia de cada cotización, para que no dependa de una sola casilla. */
+    'correos_equipo' => ['otorres@ifkchile.com', 'vjorquera@ifkchile.com'],
     'telefono'     => '+56 9 8546 4643',
     'whatsapp'     => '56985464643',             // sólo dígitos, formato internacional
     'whatsapp_msg' => '',                        // el cliente pidió sin mensaje automático
@@ -65,8 +67,8 @@ $AREAS = [
             ],
         ],
         'esquema'   => [
-            'archivo' => 'img/camara-frigorifica.svg',
-            'titulo'  => 'Las partes de una cámara frigorífica',
+            'archivo' => 'img/camara-frigorifica.jpg',
+            'titulo'  => 'Componentes básicos de una cámara frigorífica',
             'bajada'  => 'Cada pieza cumple una función: el evaporador enfría, la unidad '
                        . 'condensadora disipa el calor afuera, la válvula equilibra la presión '
                        . 'y el panel aísla. Nosotros proyectamos, montamos y mantenemos el conjunto.',
@@ -79,7 +81,8 @@ $AREAS = [
         'bajada'    => 'Aire acondicionado y bombas de calor: domiciliario, comercial e industrial.',
         'intro'     => 'Proyectos de climatización completos: cálculo, suministro, montaje y mantención '
                      . 'de equipos Split, ducto, cassette, VRF y bombas de calor.',
-        'foto'      => 'img/camara-frio.jpg',
+        'foto'      => 'img/climatizacion-volcanes.jpg',
+        'velo'      => 'paisaje',       // se ve el fondo: los equipos y los volcanes
         'meta'      => ['Split · VRF', 'Bombas de calor'],
         'servicios' => [
             'Servicio técnico correctivo y preventivo',
@@ -103,6 +106,7 @@ $AREAS = [
                 ['archivo' => 'img/areas/climatizacion-4.jpg', 'pie' => 'Multisplit Midea con control centralizado.'],
                 ['archivo' => 'img/areas/climatizacion-5.jpg', 'pie' => 'Consola Midea Xtreme Heat, para calefacción en climas fríos.'],
                 ['archivo' => 'img/areas/climatizacion-6.jpg', 'pie' => 'Multisplit LG Artcool Mirror: cuatro unidades interiores con un solo equipo exterior.'],
+                ['archivo' => 'img/areas/climatizacion-7.jpg', 'pie' => 'Equipos en techo, instalados por nosotros en el sur de Chile.'],
             ],
         ],
     ],

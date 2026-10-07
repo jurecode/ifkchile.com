@@ -250,6 +250,12 @@ function cotizacion_enviar(array $datos, string $servicio, array $fotos, array $
         'MIME-Version: 1.0',
     ];
 
+    /* Copia a las casillas del equipo: así una cotización no se queda esperando
+       a que alguien revise una sola bandeja. */
+    $copias = array_filter((array)($SITE['correos_equipo'] ?? []),
+                           fn($c) => filter_var($c, FILTER_VALIDATE_EMAIL));
+    if ($copias) $cab[] = 'Cc: ' . implode(', ', $copias);
+
     if (!$fotos) {
         $cab[] = 'Content-Type: text/plain; charset=UTF-8';
         return @mail($SITE['email'], $asunto, $texto, implode("\r\n", $cab));
