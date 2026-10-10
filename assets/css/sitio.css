@@ -239,7 +239,12 @@ p:last-child{margin-bottom:0}
 .galeria img{width:100%;display:block;background:#fff}
 .galeria figcaption{padding:14px 18px 17px;font-size:.88rem;line-height:1.5;color:var(--tinta-suave)}
 
-.galeria--fotos img{aspect-ratio:4/3;object-fit:cover}
+/* Las fotos de obra se muestran enteras, cada una con su propia forma. Antes
+   iban recortadas a un rectángulo fijo y ese recorte se comía justo la
+   esquina donde va el sello de IFK, además de achatar las apaisadas. */
+.galeria--fotos{align-items:start}
+.galeria--fotos figure{height:auto}
+.galeria--fotos img{object-fit:contain}
 .galeria--equipos img{aspect-ratio:4/3;object-fit:contain;padding:16px}
 .galeria--esquemas{grid-template-columns:repeat(2,1fr)}
 .galeria--esquemas img{aspect-ratio:16/10;object-fit:contain;padding:12px}
