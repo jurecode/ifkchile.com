@@ -25,6 +25,7 @@ declare(strict_types=1);
 define('RAIZ', __DIR__);
 
 require_once __DIR__ . '/app/sitio.php';
+require_once __DIR__ . '/app/sello.php';   // para el selector de esquina del logo
 
 /** Lee config.php. Devuelve null si todavía no existe. */
 function cargar_config(): ?array {
@@ -680,6 +681,18 @@ if ($CFG && $_SERVER['REQUEST_METHOD'] === 'POST' && $csrf_ok && $aviso === '') 
         require_once __DIR__ . '/app/marcas.php';
         [$ok, $aviso] = marcas_actualizar((array)($_POST['m'] ?? []));
 
+    /* Ya dentro: una foto del sitio (Imágenes · pestañas) */
+    } elseif (isset($_POST['imagen_subir'])) {
+        [$ok, $aviso] = imagen_subir(
+            $_FILES['foto'] ?? [],
+            (string)$_POST['imagen_subir'],
+            !empty($_POST['sello']),
+            (string)($_POST['esquina'] ?? 'sup-der')
+        );
+
+    } elseif (isset($_POST['imagen_restaurar'])) {
+        [$ok, $aviso] = imagen_restaurar((string)$_POST['imagen_restaurar']);
+
     /* Ya dentro: la palabra */
     } else {
         $texto   = trim((string)($_POST['orden'] ?? ''));
@@ -714,6 +727,13 @@ if ($CFG && $_SERVER['REQUEST_METHOD'] === 'POST' && $csrf_ok && $aviso === '') 
 }
 
 $csrf = $_SESSION['csrf'];
+
+/* Las fotos del sitio, en pestañas. La que estaba abierta se recuerda para
+   volver a ella después de subir: si no, el panel saltaría siempre a la
+   primera y habría que buscar de nuevo dónde se estaba. */
+$GRUPOS  = $dentro ? imagenes_catalogo() : [];
+$pestana = (string)($_POST['pestana'] ?? '');
+if (!isset($GRUPOS[$pestana])) $pestana = (string)array_key_first($GRUPOS);
 ?>
 <!doctype html>
 <html lang="es">
@@ -788,6 +808,51 @@ $csrf = $_SESSION['csrf'];
   .subir input[type=file] { padding: 9px; font-size: 13px; }
   .subir .ancho { grid-column: 1 / -1; }
 
+  /* ---------------- Imágenes del sitio ---------------- */
+
+  .fotos { margin-top: 18px; }
+  .pest__r { position: absolute; opacity: 0; pointer-events: none; }
+  .pest__nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 0;
+               border-bottom: 1px solid #e1e4ea; padding-bottom: 10px; }
+  .pest__nav label { padding: 7px 11px; font-size: 12.5px; border-radius: 7px;
+                     border: 1px solid #e1e4ea; background: #f7f8fa; color: #4b5563; cursor: pointer; }
+  .pest__nav label:hover { border-color: #2563eb; color: #2563eb; }
+  .pest__nav label b { font-weight: 600; opacity: .55; margin-left: 4px; }
+  .hoja { display: none; }
+  .hoja__ir { margin: 14px 0 0; font-size: 12.5px; color: #6b7280; }
+  .hoja__ir a { color: #2563eb; }
+
+  .tarjeta { display: grid; grid-template-columns: 148px 1fr; gap: 14px; margin-top: 14px;
+             padding: 12px; border: 1px solid #e1e4ea; border-radius: 10px; background: #fbfcfe; }
+  .tarjeta__prev { display: grid; place-items: center; height: 104px; overflow: hidden;
+                   border-radius: 7px; background: #eef1f5; }
+  .tarjeta__prev img { max-width: 100%; max-height: 104px; display: block; }
+  .tarjeta h3 { margin: 0 0 6px; font-size: 13.5px; }
+  .tarjeta p { margin: 0 0 5px; font-size: 12.5px; color: #4b5563; line-height: 1.45; }
+  .tarjeta p b { color: #16181d; font-weight: 600; }
+  .tarjeta .ficha { margin: 8px 0 10px; font-size: 11.5px; color: #8b919b; }
+  .tarjeta .ficha code { background: rgba(127,127,127,.14); padding: 1px 4px; border-radius: 3px; }
+  .marbete { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 20px;
+             font-size: 10.5px; font-weight: 600; background: #e4edff; color: #1d4ed8;
+             vertical-align: 2px; }
+
+  .tarjeta form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .tarjeta input[type=file] { flex: 1 1 200px; min-width: 0; padding: 7px; font-size: 12px;
+                              border: 1px solid #d0d3d9; border-radius: 7px; background: #fff; }
+  .tarjeta button { padding: 8px 13px; font-size: 12.5px; border-radius: 7px; }
+  .tarjeta button.volver { background: #eef0f4; color: #16181d; }
+  .sello-op { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 7px;
+              font-size: 12px; color: #6b7280; }
+  .sello-op select { padding: 5px 7px; font-size: 11.5px; border: 1px solid #d0d3d9;
+                     border-radius: 6px; background: #fff; color: inherit; }
+  .sello-op input { accent-color: #2563eb; }
+
+  @media (max-width: 560px) {
+    .tarjeta { grid-template-columns: 1fr; }
+    .tarjeta__prev { height: 150px; }
+    .tarjeta__prev img { max-height: 150px; }
+  }
+
   @media (prefers-color-scheme: dark) {
     body { background: #14161a; color: #e6e8ec; }
     input { background: #1c1f25; border-color: #333842; }
@@ -802,6 +867,15 @@ $csrf = $_SESSION['csrf'];
     .rejilla button { background: #2a2f37; color: #e6e8ec; }
     .rejilla button.borrar { background: #3a2020; color: #f3c7c7; }
     .rejilla .campo-nombre, .rejilla select { background: #14161a; border-color: #333842; }
+    .pest__nav { border-bottom-color: #333842; }
+    .pest__nav label { background: #22262d; border-color: #333842; color: #b9bfc9; }
+    .tarjeta { background: #1c1f25; border-color: #333842; }
+    .tarjeta__prev { background: #14161a; }
+    .tarjeta p { color: #b9bfc9; }
+    .tarjeta p b { color: #e6e8ec; }
+    .tarjeta input[type=file], .sello-op select { background: #14161a; border-color: #333842; color: inherit; }
+    .tarjeta button.volver { background: #2a2f37; color: #e6e8ec; }
+    .marbete { background: #1e2f4d; color: #a8c6ff; }
   }
 </style>
 <main>
@@ -960,6 +1034,94 @@ $csrf = $_SESSION['csrf'];
       <button name="marcas_guardar" value="1" style="margin-top:14px">Guardar los cambios</button>
     </form>
   </section>
+
+  <section class="sitio fotos" id="imagenes">
+    <style>
+      <?php foreach (array_keys($GRUPOS) as $k): ?>
+        #p-<?= e($k) ?>:checked ~ .pest__nav label[for="p-<?= e($k) ?>"]{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
+        #p-<?= e($k) ?>:checked ~ #h-<?= e($k) ?>{display:block}
+      <?php endforeach; ?>
+    </style>
+
+    <h2>Imágenes del sitio</h2>
+    <p class="hint">Cada foto del sitio está aquí, en la pestaña de la página donde aparece.
+       Debajo de cada una dice <b>dónde se ve</b> y <b>qué conviene que muestre</b>.
+       Sirve lo que salga de un celular: la foto se achica y se endereza sola.
+       Las fotos se suben <b>sin marca de agua</b>; si quieres el sello de IFK encima,
+       marca la casilla. La foto original nunca se borra, así que siempre puedes
+       <b>volver atrás</b>. Después de cambiar fotos, escribe <code
+       style="font-size:12px;background:rgba(127,127,127,.14);padding:1px 4px;border-radius:3px">subir</code>
+       arriba para guardarlas en GitHub.</p>
+
+    <?php foreach (array_keys($GRUPOS) as $k): ?>
+      <input type="radio" name="pest" class="pest__r" id="p-<?= e($k) ?>" <?= $k === $pestana ? 'checked' : '' ?>>
+    <?php endforeach; ?>
+
+    <nav class="pest__nav">
+      <?php foreach ($GRUPOS as $k => $g): ?>
+        <label for="p-<?= e($k) ?>"><?= e($g['titulo']) ?><b><?= count($g['ranuras']) ?></b></label>
+      <?php endforeach; ?>
+    </nav>
+
+    <?php foreach ($GRUPOS as $k => $g): ?>
+      <div class="hoja" id="h-<?= e($k) ?>">
+        <p class="hoja__ir">Estas fotos salen en
+           <a href="<?= e($g['pagina']) ?>?ver=sitio" target="_blank" rel="noopener"><?= e($g['pagina']) ?></a>.</p>
+
+        <?php foreach ($g['ranuras'] as $r):
+          $ruta    = imagen($r['id']);
+          $archivo = RAIZ . '/assets/' . $ruta;
+          $medida  = @getimagesize($archivo);
+          $cambiada = imagen_cambiada($r['id']);
+        ?>
+          <article class="tarjeta">
+            <div class="tarjeta__prev">
+              <?php if ($medida): ?>
+                <img src="/assets/<?= e($ruta) ?>?v=<?= (int)@filemtime($archivo) ?>" alt="" loading="lazy">
+              <?php else: ?>
+                <span style="color:#9aa3ae;font-size:12px">falta el archivo</span>
+              <?php endif; ?>
+            </div>
+            <div>
+              <h3><?= e($r['titulo']) ?><?php if ($cambiada): ?><span class="marbete">cambiada</span><?php endif; ?></h3>
+              <p><b>Dónde se ve:</b> <?= e($r['donde']) ?></p>
+              <p><b>Qué poner:</b> <?= e($r['que']) ?></p>
+              <p class="ficha">
+                <?= e($r['forma']) ?>
+                <?php if ($medida): ?> · hoy: <?= (int)$medida[0] ?>×<?= (int)$medida[1] ?> px,
+                  <?= (int)round((int)@filesize($archivo) / 1024) ?> KB<?php endif; ?>
+                · <code><?= e(basename($ruta)) ?></code>
+              </p>
+
+              <form method="post" enctype="multipart/form-data">
+                <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
+                <input type="hidden" name="pestana" value="<?= e($k) ?>">
+                <input type="file" name="foto" accept="image/jpeg,image/png,image/webp"
+                       aria-label="Foto nueva para <?= e($r['titulo']) ?>">
+                <button name="imagen_subir" value="<?= e($r['id']) ?>">Cambiar</button>
+                <?php if ($cambiada): ?>
+                  <button class="volver" name="imagen_restaurar" value="<?= e($r['id']) ?>"
+                          onclick="return confirm('¿Volver a la foto original del sitio?')">Volver a la original</button>
+                <?php endif; ?>
+                <span class="sello-op">
+                  <label><input type="checkbox" name="sello" value="1"> Estampar el logo de IFK</label>
+                  <select name="esquina" aria-label="Esquina del logo">
+                    <?php foreach (sello_esquinas() as $clave => $texto): ?>
+                      <option value="<?= e($clave) ?>" <?= $clave === $r['esquina'] ? 'selected' : '' ?>><?= e($texto) ?></option>
+                    <?php endforeach; ?>
+                  </select>
+                </span>
+              </form>
+            </div>
+          </article>
+        <?php endforeach; ?>
+      </div>
+    <?php endforeach; ?>
+  </section>
+
+  <?php if (isset($_POST['pestana'])): ?>
+    <script>document.getElementById('imagenes')?.scrollIntoView();</script>
+  <?php endif; ?>
 <?php endif; ?>
 
 </main>

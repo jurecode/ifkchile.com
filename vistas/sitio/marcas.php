@@ -4,12 +4,12 @@ $titulo = 'Marcas — ' . $SITE['nombre_largo'];
 $desc   = 'Hispania, Danfoss, Bitzer, Dorin, Midea, Hisense, LG, Samsung, Trane, Sodeca y '
         . 'Soler & Palau: las marcas con las que IFK proyecta, instala y mantiene.';
 $aqui   = '/marcas';
-$og_foto = 'img/climatizacion.jpg';
+$og_foto = imagen('marcas-hero');
 require __DIR__ . '/cabeza.php';
 ?>
 
 <section class="hero hero--corto">
-  <img class="hero__foto" src="<?= asset('img/climatizacion.jpg') ?>" alt="" fetchpriority="high">
+  <img class="hero__foto" src="<?= asset(imagen('marcas-hero')) ?>" alt="" fetchpriority="high">
   <div class="hero__velo"></div>
   <div class="env">
     <div class="hero__caja">

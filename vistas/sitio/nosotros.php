@@ -4,12 +4,12 @@ $titulo = 'Nosotros — ' . $SITE['nombre_largo'];
 $desc   = $SITE['razon_social'] . ': ' . $SITE['anios'] . ' años de experiencia en refrigeración, '
         . 'climatización, ventilación y contenedores refrigerados en el sur de Chile.';
 $aqui   = '/nosotros';
-$og_foto = 'img/nosotros.jpg';
+$og_foto = imagen('nosotros-hero');
 require __DIR__ . '/cabeza.php';
 ?>
 
 <section class="hero hero--corto">
-  <img class="hero__foto" src="<?= asset('img/nosotros.jpg') ?>" alt="" fetchpriority="high">
+  <img class="hero__foto" src="<?= asset(imagen('nosotros-hero')) ?>" alt="" fetchpriority="high">
   <div class="hero__velo"></div>
   <div class="env">
     <div class="hero__caja">
@@ -38,7 +38,7 @@ require __DIR__ . '/cabeza.php';
       </ul>
     </div>
     <div class="dos__foto revelar">
-      <img src="<?= asset('img/metodo.jpg') ?>" alt="Equipo técnico de IFK trabajando" loading="lazy">
+      <img src="<?= asset(imagen('nosotros-metodo')) ?>" alt="Equipo técnico de IFK trabajando" loading="lazy">
     </div>
   </div>
 </section>

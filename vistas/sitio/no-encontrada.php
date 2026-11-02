@@ -7,7 +7,7 @@ require __DIR__ . '/cabeza.php';
 ?>
 
 <section class="hero hero--corto">
-  <img class="hero__foto" src="<?= asset('img/hero.jpg') ?>" alt="">
+  <img class="hero__foto" src="<?= asset(imagen('compartir')) ?>" alt="">
   <div class="hero__velo"></div>
   <div class="env">
     <div class="hero__caja">

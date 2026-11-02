@@ -8,7 +8,7 @@ $titulo  = $titulo ?? ($SITE['nombre_largo'] . ' — ' . $SITE['claim']);
 $desc    = $desc   ?? ($SITE['claim'] . ' para industria, comercio y hogar. '
                     . $SITE['anios'] . ' años de experiencia en el sur de Chile.');
 $aqui    = $aqui ?? '/';
-$og_foto = $og_foto ?? 'img/hero.jpg';
+$og_foto = $og_foto ?? imagen('compartir');
 $canon   = rtrim($SITE['dominio'], '/') . ($aqui === '/' ? '/' : $aqui);
 ?>
 <!doctype html>
@@ -45,7 +45,7 @@ $canon   = rtrim($SITE['dominio'], '/') . ($aqui === '/' ? '/' : $aqui);
     'alternateName' => $SITE['marca'],
     'description'   => $desc,
     'url'           => $SITE['dominio'],
-    'image'         => rtrim($SITE['dominio'], '/') . '/assets/img/hero.jpg',
+    'image'         => rtrim($SITE['dominio'], '/') . '/assets/' . imagen('compartir'),
     'telephone'     => $SITE['telefono'],
     'email'         => $SITE['email'],
     'address'       => [

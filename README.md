@@ -30,7 +30,9 @@ app/marca.php       la empresa: teléfono, correo, dirección y las 4 áreas
 app/contenido.php   respaldo, valores, método, proyectos, marcas, clientes
 app/cotizacion.php  el formulario de contacto: revisa, guarda y envía
 app/marcas.php      las marcas y sus logotipos
-contenido/          lo que se edita desde el panel (marcas)
+app/imagenes.php    las fotos del sitio, cambiables desde el panel
+app/sello.php       el logo de IFK estampado sobre una foto
+contenido/          lo que se edita desde el panel (marcas, imágenes)
 app/sitio.php       el estado del sitio, la sesión y las ayudas comunes
 vistas/             fachada y mantenimiento
 vistas/sitio/       las páginas del sitio y sus partes comunes
@@ -71,6 +73,39 @@ rejilla por rubro de la página Marcas, y la tarjeta de cada área. Siempre en
 blanco y negro, y a color cuando les pasan el mouse. **Una marca sin logotipo
 muestra su nombre**, así que la sección nunca se ve a medio llenar.
 
+## Las fotos del sitio
+
+Las 30 fotografías del sitio se cambian desde el panel, sin tocar código.
+
+Cada una tiene una **ranura**: un nombre fijo (`portada`, `nosotros-metodo`,
+`area-refrigeracion-foto-1`…) con su descripción, dónde aparece, qué conviene
+que muestre y a qué ancho se guarda. El catálogo está en `app/imagenes.php` y
+es lo que el panel dibuja en pestañas, una por página.
+
+Mientras nadie suba nada, cada ranura muestra la foto original del repositorio.
+Al subir una, el archivo nuevo queda en `assets/img/subidas/` y la ranura se
+anota en `contenido/imagenes.json`. **La original no se toca nunca**, por eso
+siempre hay un botón para volver a ella.
+
+Las vistas no saben nada de todo esto: las fotos sueltas se piden con
+`imagen('ranura')`, y las de las áreas las cambia `imagenes_aplicar()` dentro
+de `app/marca.php`, antes de que las vistas lleguen a mirarlas.
+
+Al recibir una foto, el panel la endereza si viene de un celular (las cámaras
+guardan la imagen acostada y anotan aparte cómo girarla), la achica al ancho de
+la ranura —nunca la agranda— y, **sólo si se marca la casilla**, le estampa el
+logo de IFK. Por omisión las fotos van **sin marca de agua**.
+
+El estampado vive aparte, en `app/sello.php`, porque lo usan dos cosas: el
+panel y `herramientas/marcar-imagen.php`. Se estampa la versión corta del
+logotipo —el copo y el IFK, sin la bajada de texto, que a ese tamaño no se lee
+y hace ver borroso todo el logo— y se mira el fondo: sobre una zona clara el
+logo va en el azul de la marca con halo blanco; sobre una oscura, blanco con
+sombra blanda.
+
+Tanto `contenido/imagenes.json` como `assets/img/subidas/` viajan a GitHub, así
+que después de cambiar fotos hay que escribir `subir` en el panel.
+
 ## El formulario de cotización
 
 Pide nombre, empresa, RUT, teléfono, correo, área, ubicación, descripción y hasta
@@ -101,6 +136,10 @@ Después, todo se maneja escribiendo una palabra:
 | `ayuda` | la lista de palabras |
 | `salir` | cierra la sesión |
 
+Debajo de la caja de la palabra hay tres secciones que se usan con el mouse:
+**Sitio** (coming soon / publicado / mantenimiento), **Marcas · logotipos** y
+**Imágenes del sitio**, esta última en pestañas, una por página.
+
 El token necesita permiso `repo` (o, si es *fine-grained*, **Contents: Read and
 write** y **Administration: Read and write** para poder crear el repositorio).
 
@@ -118,6 +157,6 @@ existen. Para entrar al panel en local hace falta un `config.php` con una clave.
 
 ## Lo que falta
 
-Están listos la fachada, el panel, el control de estado y el sitio completo.
-Queda el CMS —editar textos, proyectos y fotos desde el panel, y revisar ahí
-mismo las cotizaciones que llegan— y la publicación final.
+Están listos la fachada, el panel, el control de estado, el sitio completo, las
+marcas y las fotos editables desde el panel. Queda editar **textos** desde el
+panel, revisar ahí mismo las cotizaciones que llegan, y la publicación final.

@@ -7,7 +7,7 @@ $titulo = 'Contacto — ' . $SITE['nombre_largo'];
 $desc   = 'Solicita una cotización de refrigeración, climatización, ventilación o contenedores refrigerados. '
         . 'WhatsApp ' . $SITE['telefono'] . ' · ' . $SITE['email'];
 $aqui   = '/contacto';
-$og_foto = 'img/ventilacion.jpg';
+$og_foto = imagen('contacto-hero');
 
 $envio   = $envio ?? ['ok' => null, 'aviso' => '', 'errores' => [], 'datos' => []];
 $errores = $envio['errores'];
@@ -18,7 +18,7 @@ require __DIR__ . '/cabeza.php';
 ?>
 
 <section class="hero hero--corto">
-  <img class="hero__foto" src="<?= asset('img/ventilacion.jpg') ?>" alt="" fetchpriority="high">
+  <img class="hero__foto" src="<?= asset(imagen('contacto-hero')) ?>" alt="" fetchpriority="high">
   <div class="hero__velo"></div>
   <div class="env">
     <div class="hero__caja">

@@ -179,3 +179,9 @@ $AREAS = [
         ],
     ],
 ];
+
+/* Las fotos que el cliente haya cambiado desde el panel entran aquí, encima
+   de las originales: así ninguna vista tiene que saber de dónde salió cada
+   una. Ver app/imagenes.php. */
+require_once __DIR__ . '/imagenes.php';
+imagenes_aplicar($AREAS);
