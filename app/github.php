@@ -166,10 +166,16 @@ function ocultar(string $texto, string $token): string {
 function preparar(array $c): void {
     if (!es_repo()) git(['init', '-b', $c['rama']]);
 
-    [, $actual] = git(['remote', 'get-url', 'origin']);
-    if (trim($actual) !== url_limpia($c)) {
-        git(['remote', 'remove', 'origin']);
-        git(['remote', 'add', 'origin', url_limpia($c)]);
+    /* Sólo se toca el origin si sabemos a nombre de quién va el repositorio.
+       Si el token no contesta, repo_nombre() devuelve el nombre suelto, sin
+       usuario, y dejarlo escrito rompe la conexión con GitHub. Mejor no
+       tocar nada: lo que ya estaba apuntaba bien. */
+    if (str_contains(repo_nombre($c), '/')) {
+        [, $actual] = git(['remote', 'get-url', 'origin']);
+        if (trim($actual) !== url_limpia($c)) {
+            git(['remote', 'remove', 'origin']);
+            git(['remote', 'add', 'origin', url_limpia($c)]);
+        }
     }
 
     /* config.php lleva el token: pase lo que pase, nunca viaja a GitHub. */
