@@ -162,6 +162,9 @@ function grupo_cambiadas(array $grupo): int {
   .entrada__caja input:focus{outline:2px solid var(--azul);outline-offset:-1px}
   .entrada__caja button{width:100%;margin-top:11px;padding:13px;border-radius:11px;
                         background:var(--navy);color:#fff;font-weight:600}
+  .entrada__pie{margin:22px 0 0;text-align:center;font-size:11.5px;letter-spacing:.04em;
+                color:rgba(255,255,255,.42)}
+  .entrada__pie b{font-weight:600;color:rgba(255,255,255,.72)}
 
   /* ---------------- Marco ---------------- */
   .barra{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:16px;
@@ -260,7 +263,12 @@ function grupo_cambiadas(array $grupo): int {
          border-radius:50%;animation:gira .7s linear infinite}
   @keyframes gira{to{transform:rotate(360deg)}}
 
+  .pie{max-width:1180px;margin:0 auto;padding:4px clamp(16px,3vw,28px) 34px;
+       text-align:right;font-size:11.5px;letter-spacing:.04em;color:#8b95a6}
+  .pie b{font-weight:600;color:var(--suave)}
+
   @media (max-width:820px){
+    .pie{text-align:center}
     .marco{grid-template-columns:1fr}
     .menu{position:static;display:flex;gap:6px;overflow-x:auto;padding:7px;-webkit-overflow-scrolling:touch}
     .menu a{white-space:nowrap}
@@ -293,6 +301,7 @@ function grupo_cambiadas(array $grupo): int {
         <div class="aviso mal" style="margin:18px 0 0;text-align:left"><b>!</b><span><?= e($aviso) ?></span></div>
       <?php endif; ?>
     </div>
+    <p class="entrada__pie">Sistema respaldado por <b>Bacano Core</b></p>
     </div>
   </div>
 
@@ -429,6 +438,8 @@ function grupo_cambiadas(array $grupo): int {
       <?php endif; ?>
     </main>
   </div>
+
+  <footer class="pie">Creado con <b>Bacano Core</b></footer>
 
   <script>
   /* Sin JavaScript el panel igual funciona: se ve el botón de archivo de
