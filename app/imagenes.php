@@ -372,10 +372,8 @@ function imagen_subir(array $subido, string $id, bool $sello, string $esquina): 
     }
     if ($anterior !== '' && $anterior !== $archivo) @unlink(CARPETA_SUBIDAS . '/' . $anterior);
 
-    $peso = (int)round(filesize($destino) / 1024);
-    return [true, '«' . $ranura['titulo'] . '» cambiada. Quedó en ' . $w . '×' . $h . ' px y ' . $peso . ' KB'
-                . ($sello ? ', con el sello de IFK.' : ', sin marca de agua.')
-                . ' Escribe "subir" para que quede guardada en GitHub.'];
+    return [true, 'Listo: «' . $ranura['titulo'] . '» ya está en el sitio'
+                . ($sello ? ', con el logo de IFK encima.' : '.')];
 }
 
 /** Vuelve a la foto original del sitio y borra la que estaba subida. */
@@ -391,7 +389,7 @@ function imagen_restaurar(string $id): array {
     if (!imagenes_guardar($lista)) return [false, 'No pude guardar contenido/imagenes.json.'];
     @unlink(CARPETA_SUBIDAS . '/' . $archivo);
 
-    return [true, '«' . $ranura['titulo'] . '» volvió a la foto original.'];
+    return [true, 'Listo: «' . $ranura['titulo'] . '» volvió a la foto anterior.'];
 }
 
 /**

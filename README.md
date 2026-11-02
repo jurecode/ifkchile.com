@@ -25,13 +25,16 @@ y `robots.txt` dice que no se indexe nada. Al publicar, eso se revierte solo.
 
 ```
 index.php           la puerta: decide fachada, mantenimiento o sitio
-admin.php           el panel  (se entra por /admin)
+admin.php           el panel técnico, de la agencia   (se entra por /admin)
+fotos.php           el panel de fotos, del cliente    (se entra por /fotos)
 app/marca.php       la empresa: teléfono, correo, dirección y las 4 áreas
 app/contenido.php   respaldo, valores, método, proyectos, marcas, clientes
 app/cotizacion.php  el formulario de contacto: revisa, guarda y envía
 app/marcas.php      las marcas y sus logotipos
 app/imagenes.php    las fotos del sitio, cambiables desde el panel
 app/sello.php       el logo de IFK estampado sobre una foto
+app/cliente.php     el acceso del cliente a /fotos
+app/github.php      git, la API de GitHub y el respaldo automático
 contenido/          lo que se edita desde el panel (marcas, imágenes)
 app/sitio.php       el estado del sitio, la sesión y las ayudas comunes
 vistas/             fachada y mantenimiento
@@ -80,7 +83,7 @@ Las 30 fotografías del sitio se cambian desde el panel, sin tocar código.
 Cada una tiene una **ranura**: un nombre fijo (`portada`, `nosotros-metodo`,
 `area-refrigeracion-foto-1`…) con su descripción, dónde aparece, qué conviene
 que muestre y a qué ancho se guarda. El catálogo está en `app/imagenes.php` y
-es lo que el panel dibuja en pestañas, una por página.
+es lo que el panel de fotos dibuja, una página por vez.
 
 Mientras nadie suba nada, cada ranura muestra la foto original del repositorio.
 Al subir una, el archivo nuevo queda en `assets/img/subidas/` y la ranura se
@@ -103,8 +106,11 @@ y hace ver borroso todo el logo— y se mira el fondo: sobre una zona clara el
 logo va en el azul de la marca con halo blanco; sobre una oscura, blanco con
 sombra blanda.
 
-Tanto `contenido/imagenes.json` como `assets/img/subidas/` viajan a GitHub, así
-que después de cambiar fotos hay que escribir `subir` en el panel.
+Tanto `contenido/imagenes.json` como `assets/img/subidas/` viajan a GitHub. El
+panel de fotos los manda solo después de cada cambio (`respaldar()`, en
+`app/github.php`); si eso falla no se le dice nada al cliente —su foto ya está
+puesta— y queda anotado en `datos/respaldo.log`, además de aparecer como
+pendiente cuando alguien escriba `estado` en `/admin`.
 
 ## El formulario de cotización
 
@@ -117,7 +123,28 @@ correo, la solicitud igual queda registrada en el servidor.
 Trae un campo trampa escondido para los robots de spam, y responde con una
 redirección para que al recargar no se mande dos veces.
 
-## El panel
+## El panel de fotos del cliente
+
+Se abre en `midominio.cl/fotos` y hace una sola cosa: cambiar las fotografías
+del sitio. Nada de GitHub, tokens, palabras de consola ni logotipos de marcas;
+todo eso es trabajo de la agencia y vive en `/admin`.
+
+El cliente entra con **su propia clave**, distinta de la del panel técnico. La
+pone la agencia desde `/admin`, en la caja **Acceso del cliente**, y se guarda
+cifrada en `datos/cliente.json` —que no viaja a GitHub, como `config.php`—.
+Sin clave puesta, `/fotos` no deja entrar a nadie.
+
+Por dentro: menú de páginas a la izquierda, tarjetas a la derecha. Cada tarjeta
+muestra la foto que hay hoy, dónde sale, qué conviene que muestre, cuánto mide
+y una zona donde arrastrar la nueva. Al elegirla se ve antes de subirla, con la
+opción de ponerle el logo encima (apagada por omisión). Al guardar, la foto
+queda en el sitio al instante y se respalda sola.
+
+Las dos sesiones tienen nombres distintos (`panel` y `fotos`), así que la
+agencia puede estar dentro de `/admin` y el cliente dentro de `/fotos` en el
+mismo navegador sin pisarse.
+
+## El panel técnico
 
 Se abre en `midominio.cl/admin`. La primera vez pide tres cosas —token de
 GitHub, clave para entrar después y nombre del repositorio— y con eso escribe
@@ -138,13 +165,14 @@ Después, todo se maneja escribiendo una palabra:
 
 Debajo de la caja de la palabra hay tres secciones que se usan con el mouse:
 **Sitio** (coming soon / publicado / mantenimiento), **Marcas · logotipos** y
-**Imágenes del sitio**, esta última en pestañas, una por página.
+**Acceso del cliente**, donde se le da o se le quita la clave de `/fotos`.
 
 El token necesita permiso `repo` (o, si es *fine-grained*, **Contents: Read and
 write** y **Administration: Read and write** para poder crear el repositorio).
 
 `config.php` y `datos/` se quedan en cada servidor: nunca viajan a GitHub. Por
-eso un sitio de prueba puede estar publicado y el de verdad en Coming Soon.
+eso un sitio de prueba puede estar publicado y el de verdad en Coming Soon, y
+por eso la clave del cliente hay que ponerla en cada instalación.
 
 ## Probar en el computador
 
@@ -157,6 +185,7 @@ existen. Para entrar al panel en local hace falta un `config.php` con una clave.
 
 ## Lo que falta
 
-Están listos la fachada, el panel, el control de estado, el sitio completo, las
-marcas y las fotos editables desde el panel. Queda editar **textos** desde el
-panel, revisar ahí mismo las cotizaciones que llegan, y la publicación final.
+Están listos la fachada, el sitio completo, el panel técnico con su control de
+estado y sus marcas, y el panel de fotos del cliente. Queda que el cliente
+pueda editar **textos** y los **pies de las fotos de galería**, revisar las
+cotizaciones desde el panel, y la publicación final.

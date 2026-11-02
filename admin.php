@@ -25,27 +25,16 @@ declare(strict_types=1);
 define('RAIZ', __DIR__);
 
 require_once __DIR__ . '/app/sitio.php';
-require_once __DIR__ . '/app/sello.php';   // para el selector de esquina del logo
+require_once __DIR__ . '/app/github.php';   // git, la API de GitHub y config.php
+require_once __DIR__ . '/app/cliente.php';  // el acceso del cliente al panel de fotos
 
-/** Lee config.php. Devuelve null si todavía no existe. */
-function cargar_config(): ?array {
-    if (!is_file(RAIZ . '/config.php')) return null;
-    $c = require RAIZ . '/config.php';
-    if (!is_array($c)) return null;
-    /* Sólo el token y la clave son obligatorios; el resto tiene valor por defecto. */
-    $c += ['token' => '', 'repo' => '', 'rama' => 'main', 'clave' => ''];
-    if (trim((string)$c['rama']) === '') $c['rama'] = 'main';
-    return $c;
-}
 
 $CFG = cargar_config();
 
-session_name('panel');
-session_start([
-    'cookie_httponly' => true,
-    'cookie_samesite' => 'Lax',
-    'cookie_secure'   => !empty($_SERVER['HTTPS']),
-]);
+/* index.php ya pudo haberla abierto al entrar por /admin; sesion_panel()
+   lo sabe y no la abre dos veces. Abrirla a mano aquí dejaba un aviso de
+   PHP arriba de la página cuando venías con la sesión puesta. */
+sesion_panel(true);
 
 header('X-Robots-Tag: noindex, nofollow');
 
@@ -53,55 +42,6 @@ header('X-Robots-Tag: noindex, nofollow');
 /* Herramientas                                                        */
 /* ------------------------------------------------------------------ */
 
-/**
- * Ejecuta un programa y devuelve [código de salida, salida completa].
- * Lee salida y errores a la vez —si no, un comando hablador puede quedarse
- * trabado llenando su tubo— y corta solo si algo se cuelga.
- */
-function correr(array $args, int $tope = 240): array {
-    $tubos = [1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
-    $env   = ['GIT_TERMINAL_PROMPT' => '0', 'HOME' => RAIZ, 'PATH' => getenv('PATH') ?: '/usr/bin:/bin'];
-
-    $proc = @proc_open($args, $tubos, $t, RAIZ, $env);
-    if (!is_resource($proc)) return [127, 'No se pudo ejecutar: ' . $args[0]];
-
-    stream_set_blocking($t[1], false);
-    stream_set_blocking($t[2], false);
-
-    $salida = '';
-    $inicio = time();
-    $estado = ['running' => true, 'exitcode' => 1];
-    while (true) {
-        $leer = [$t[1], $t[2]];
-        $escribir = $excepto = null;
-        if (@stream_select($leer, $escribir, $excepto, 1) > 0) {
-            foreach ($leer as $tubo) $salida .= (string)fread($tubo, 16384);
-        }
-        $estado = proc_get_status($proc);
-        if (!$estado['running']) break;
-        if (time() - $inicio > $tope) {
-            proc_terminate($proc, 9);
-            $salida .= "\n[El comando pasó de " . $tope . " segundos y se detuvo.]";
-            break;
-        }
-    }
-    foreach ([$t[1], $t[2]] as $tubo) {
-        while (($resto = fread($tubo, 16384)) !== '' && $resto !== false) $salida .= $resto;
-        fclose($tubo);
-    }
-    $cod = proc_close($proc);
-    if (($estado['exitcode'] ?? -1) >= 0) $cod = $estado['exitcode'];
-
-    return [$cod, trim($salida)];
-}
-
-/** Lo mismo, pero para git y sin que se queje del dueño de la carpeta. */
-function git(array $args): array {
-    return correr(array_merge(['git', '-c', 'safe.directory=' . RAIZ], $args));
-}
-
-function hay_git(): bool { return git(['--version'])[0] === 0; }
-function es_repo(): bool { return is_dir(RAIZ . '/.git'); }
 
 /* ---------------- Primera vez ---------------- */
 
@@ -137,112 +77,6 @@ function proteger_config(): void {
 
 /* ---------------- GitHub ---------------- */
 
-/** Le pregunta algo a GitHub. Devuelve [código HTTP, respuesta]. */
-function api(array $c, string $metodo, string $ruta, ?array $datos = null): array {
-    $url    = 'https://api.github.com' . $ruta;
-    $cuerpo = $datos === null ? null : json_encode($datos, JSON_UNESCAPED_SLASHES);
-    $cab    = [
-        'Accept: application/vnd.github+json',
-        'Authorization: Bearer ' . trim((string)$c['token']),
-        'User-Agent: panel-web',
-        'X-GitHub-Api-Version: 2022-11-28',
-        'Content-Type: application/json',
-    ];
-
-    if (function_exists('curl_init')) {
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CUSTOMREQUEST  => $metodo,
-            CURLOPT_HTTPHEADER     => $cab,
-            CURLOPT_TIMEOUT        => 20,
-        ]);
-        if ($cuerpo !== null) curl_setopt($ch, CURLOPT_POSTFIELDS, $cuerpo);
-        $resp = (string)curl_exec($ch);
-        $cod  = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        if (PHP_VERSION_ID < 80000) curl_close($ch);   // en PHP 8 ya no hace falta
-    } else {
-        $ctx  = stream_context_create(['http' => [
-            'method'         => $metodo,
-            'header'         => implode("\r\n", $cab),
-            'content'        => $cuerpo,
-            'ignore_errors'  => true,
-            'timeout'        => 20,
-        ]]);
-        $resp = (string)@file_get_contents($url, false, $ctx);
-        $cod  = 0;
-        foreach ($http_response_header ?? [] as $h) {
-            if (preg_match('#^HTTP/\S+ (\d+)#', $h, $m)) $cod = (int)$m[1];
-        }
-    }
-
-    return [$cod, json_decode($resp, true) ?: []];
-}
-
-/** Quién es el dueño del token. */
-function github_usuario(array $c): string {
-    static $u = null;
-    if ($u !== null) return $u;
-    [$cod, $d] = api($c, 'GET', '/user');
-    return $u = ($cod === 200 && !empty($d['login'])) ? (string)$d['login'] : '';
-}
-
-/** "usuario/proyecto", sacado de config.php o, si va vacío, del propio dominio. */
-function repo_nombre(array $c): string {
-    static $n = null;
-    if ($n !== null) return $n;
-
-    $r = trim((string)($c['repo'] ?? ''));
-    if ($r === '') {
-        $r = preg_replace('/:\d+$/', '', strtolower((string)($_SERVER['HTTP_HOST'] ?? '')));
-        $r = preg_replace('/^www\./', '', (string)$r);
-    }
-    $r = preg_replace('#^(https?://)?([^@/]*@)?github\.com/#i', '', $r);
-    $r = preg_replace('#\.git$#i', '', rtrim((string)$r, '/'));
-    if (!str_contains((string)$r, '/')) {
-        $duenio = github_usuario($c);
-        $r = ($duenio !== '' ? $duenio . '/' : '') . $r;
-    }
-    return $n = (string)$r;
-}
-
-/** Dirección del repositorio sin usuario ni contraseña. */
-function url_limpia(array $c): string {
-    return 'https://github.com/' . repo_nombre($c) . '.git';
-}
-
-/** La misma dirección, pero con el token para poder subir o bajar. */
-function url_token(array $c): string {
-    return 'https://x-access-token:' . rawurlencode(trim((string)$c['token']))
-         . '@github.com/' . repo_nombre($c) . '.git';
-}
-
-/** El token nunca se muestra en pantalla. */
-function ocultar(string $texto, string $token): string {
-    $token = trim($token);
-    return $token === '' ? $texto : str_replace([$token, rawurlencode($token)], '••••••', $texto);
-}
-
-/** Si la carpeta todavía no es un repositorio, la prepara. */
-function preparar(array $c): void {
-    if (!es_repo()) git(['init', '-b', $c['rama']]);
-
-    [, $actual] = git(['remote', 'get-url', 'origin']);
-    if (trim($actual) !== url_limpia($c)) {
-        git(['remote', 'remove', 'origin']);
-        git(['remote', 'add', 'origin', url_limpia($c)]);
-    }
-
-    /* config.php lleva el token: pase lo que pase, nunca viaja a GitHub. */
-    $gi  = RAIZ . '/.gitignore';
-    $txt = is_file($gi) ? (string)file_get_contents($gi) : '';
-    if (!preg_match('#^\s*/?config\.php\s*$#m', $txt)) {
-        @file_put_contents($gi, ($txt === '' ? '' : rtrim($txt) . "\n") . "config.php\n");
-    }
-    if (git(['ls-files', '--error-unmatch', 'config.php'])[0] === 0) {
-        git(['rm', '--cached', '-q', 'config.php']);
-    }
-}
 
 /* ------------------------------------------------------------------ */
 /* Las palabras                                                        */
@@ -681,17 +515,12 @@ if ($CFG && $_SERVER['REQUEST_METHOD'] === 'POST' && $csrf_ok && $aviso === '') 
         require_once __DIR__ . '/app/marcas.php';
         [$ok, $aviso] = marcas_actualizar((array)($_POST['m'] ?? []));
 
-    /* Ya dentro: una foto del sitio (Imágenes · pestañas) */
-    } elseif (isset($_POST['imagen_subir'])) {
-        [$ok, $aviso] = imagen_subir(
-            $_FILES['foto'] ?? [],
-            (string)$_POST['imagen_subir'],
-            !empty($_POST['sello']),
-            (string)($_POST['esquina'] ?? 'sup-der')
-        );
+    /* Ya dentro: la clave con la que el cliente entra a /fotos */
+    } elseif (isset($_POST['clave_cliente'])) {
+        [$ok, $aviso] = cliente_clave_guardar((string)($_POST['clave_cliente_nueva'] ?? ''));
 
-    } elseif (isset($_POST['imagen_restaurar'])) {
-        [$ok, $aviso] = imagen_restaurar((string)$_POST['imagen_restaurar']);
+    } elseif (isset($_POST['clave_cliente_quitar'])) {
+        [$ok, $aviso] = cliente_clave_quitar();
 
     /* Ya dentro: la palabra */
     } else {
@@ -727,13 +556,6 @@ if ($CFG && $_SERVER['REQUEST_METHOD'] === 'POST' && $csrf_ok && $aviso === '') 
 }
 
 $csrf = $_SESSION['csrf'];
-
-/* Las fotos del sitio, en pestañas. La que estaba abierta se recuerda para
-   volver a ella después de subir: si no, el panel saltaría siempre a la
-   primera y habría que buscar de nuevo dónde se estaba. */
-$GRUPOS  = $dentro ? imagenes_catalogo() : [];
-$pestana = (string)($_POST['pestana'] ?? '');
-if (!isset($GRUPOS[$pestana])) $pestana = (string)array_key_first($GRUPOS);
 ?>
 <!doctype html>
 <html lang="es">
@@ -808,51 +630,6 @@ if (!isset($GRUPOS[$pestana])) $pestana = (string)array_key_first($GRUPOS);
   .subir input[type=file] { padding: 9px; font-size: 13px; }
   .subir .ancho { grid-column: 1 / -1; }
 
-  /* ---------------- Imágenes del sitio ---------------- */
-
-  .fotos { margin-top: 18px; }
-  .pest__r { position: absolute; opacity: 0; pointer-events: none; }
-  .pest__nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 0;
-               border-bottom: 1px solid #e1e4ea; padding-bottom: 10px; }
-  .pest__nav label { padding: 7px 11px; font-size: 12.5px; border-radius: 7px;
-                     border: 1px solid #e1e4ea; background: #f7f8fa; color: #4b5563; cursor: pointer; }
-  .pest__nav label:hover { border-color: #2563eb; color: #2563eb; }
-  .pest__nav label b { font-weight: 600; opacity: .55; margin-left: 4px; }
-  .hoja { display: none; }
-  .hoja__ir { margin: 14px 0 0; font-size: 12.5px; color: #6b7280; }
-  .hoja__ir a { color: #2563eb; }
-
-  .tarjeta { display: grid; grid-template-columns: 148px 1fr; gap: 14px; margin-top: 14px;
-             padding: 12px; border: 1px solid #e1e4ea; border-radius: 10px; background: #fbfcfe; }
-  .tarjeta__prev { display: grid; place-items: center; height: 104px; overflow: hidden;
-                   border-radius: 7px; background: #eef1f5; }
-  .tarjeta__prev img { max-width: 100%; max-height: 104px; display: block; }
-  .tarjeta h3 { margin: 0 0 6px; font-size: 13.5px; }
-  .tarjeta p { margin: 0 0 5px; font-size: 12.5px; color: #4b5563; line-height: 1.45; }
-  .tarjeta p b { color: #16181d; font-weight: 600; }
-  .tarjeta .ficha { margin: 8px 0 10px; font-size: 11.5px; color: #8b919b; }
-  .tarjeta .ficha code { background: rgba(127,127,127,.14); padding: 1px 4px; border-radius: 3px; }
-  .marbete { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 20px;
-             font-size: 10.5px; font-weight: 600; background: #e4edff; color: #1d4ed8;
-             vertical-align: 2px; }
-
-  .tarjeta form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  .tarjeta input[type=file] { flex: 1 1 200px; min-width: 0; padding: 7px; font-size: 12px;
-                              border: 1px solid #d0d3d9; border-radius: 7px; background: #fff; }
-  .tarjeta button { padding: 8px 13px; font-size: 12.5px; border-radius: 7px; }
-  .tarjeta button.volver { background: #eef0f4; color: #16181d; }
-  .sello-op { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 7px;
-              font-size: 12px; color: #6b7280; }
-  .sello-op select { padding: 5px 7px; font-size: 11.5px; border: 1px solid #d0d3d9;
-                     border-radius: 6px; background: #fff; color: inherit; }
-  .sello-op input { accent-color: #2563eb; }
-
-  @media (max-width: 560px) {
-    .tarjeta { grid-template-columns: 1fr; }
-    .tarjeta__prev { height: 150px; }
-    .tarjeta__prev img { max-height: 150px; }
-  }
-
   @media (prefers-color-scheme: dark) {
     body { background: #14161a; color: #e6e8ec; }
     input { background: #1c1f25; border-color: #333842; }
@@ -867,15 +644,6 @@ if (!isset($GRUPOS[$pestana])) $pestana = (string)array_key_first($GRUPOS);
     .rejilla button { background: #2a2f37; color: #e6e8ec; }
     .rejilla button.borrar { background: #3a2020; color: #f3c7c7; }
     .rejilla .campo-nombre, .rejilla select { background: #14161a; border-color: #333842; }
-    .pest__nav { border-bottom-color: #333842; }
-    .pest__nav label { background: #22262d; border-color: #333842; color: #b9bfc9; }
-    .tarjeta { background: #1c1f25; border-color: #333842; }
-    .tarjeta__prev { background: #14161a; }
-    .tarjeta p { color: #b9bfc9; }
-    .tarjeta p b { color: #e6e8ec; }
-    .tarjeta input[type=file], .sello-op select { background: #14161a; border-color: #333842; color: inherit; }
-    .tarjeta button.volver { background: #2a2f37; color: #e6e8ec; }
-    .marbete { background: #1e2f4d; color: #a8c6ff; }
   }
 </style>
 <main>
@@ -1035,93 +803,45 @@ if (!isset($GRUPOS[$pestana])) $pestana = (string)array_key_first($GRUPOS);
     </form>
   </section>
 
-  <section class="sitio fotos" id="imagenes">
-    <style>
-      <?php foreach (array_keys($GRUPOS) as $k): ?>
-        #p-<?= e($k) ?>:checked ~ .pest__nav label[for="p-<?= e($k) ?>"]{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
-        #p-<?= e($k) ?>:checked ~ #h-<?= e($k) ?>{display:block}
-      <?php endforeach; ?>
-    </style>
+  <section class="sitio">
+    <h2>Acceso del cliente</h2>
+    <p class="hint">El cliente cambia las fotografías del sitio en su propio panel,
+       <a href="/fotos" target="_blank" rel="noopener"><b><?= e(preg_replace('#^https?://#', '', $SITE['dominio'])) ?>/fotos</b></a>,
+       que no tiene nada de esto: ni GitHub, ni palabras, ni marcas. Entra con la clave
+       que le pongas aquí —distinta de la tuya— y lo que cambie se respalda solo.</p>
 
-    <h2>Imágenes del sitio</h2>
-    <p class="hint">Cada foto del sitio está aquí, en la pestaña de la página donde aparece.
-       Debajo de cada una dice <b>dónde se ve</b> y <b>qué conviene que muestre</b>.
-       Sirve lo que salga de un celular: la foto se achica y se endereza sola.
-       Las fotos se suben <b>sin marca de agua</b>; si quieres el sello de IFK encima,
-       marca la casilla. La foto original nunca se borra, así que siempre puedes
-       <b>volver atrás</b>. Después de cambiar fotos, escribe <code
-       style="font-size:12px;background:rgba(127,127,127,.14);padding:1px 4px;border-radius:3px">subir</code>
-       arriba para guardarlas en GitHub.</p>
+    <p class="ahora">
+      <span class="luz <?= cliente_tiene_clave() ? 'verde' : 'gris' ?>"></span>
+      <?php if (cliente_tiene_clave()): ?>
+        El cliente <b>puede entrar</b>
+        <?php if ((string)cliente_datos()['visto'] !== ''): ?>
+          <span style="color:#6b7280">· última vez el
+            <?= e(date('d-m-Y H:i', strtotime((string)cliente_datos()['visto']))) ?></span>
+        <?php else: ?>
+          <span style="color:#6b7280">· todavía no ha entrado</span>
+        <?php endif; ?>
+      <?php else: ?>
+        <b>Sin clave puesta:</b> nadie puede entrar a /fotos
+      <?php endif; ?>
+    </p>
 
-    <?php foreach (array_keys($GRUPOS) as $k): ?>
-      <input type="radio" name="pest" class="pest__r" id="p-<?= e($k) ?>" <?= $k === $pestana ? 'checked' : '' ?>>
-    <?php endforeach; ?>
+    <form method="post">
+      <input type="password" name="clave_cliente_nueva" autocomplete="new-password"
+             placeholder="<?= cliente_tiene_clave() ? 'Clave nueva' : 'Clave para el cliente' ?>"
+             aria-label="Clave del cliente">
+      <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
+      <button name="clave_cliente" value="1"><?= cliente_tiene_clave() ? 'Cambiar la clave' : 'Dar acceso' ?></button>
+    </form>
 
-    <nav class="pest__nav">
-      <?php foreach ($GRUPOS as $k => $g): ?>
-        <label for="p-<?= e($k) ?>"><?= e($g['titulo']) ?><b><?= count($g['ranuras']) ?></b></label>
-      <?php endforeach; ?>
-    </nav>
-
-    <?php foreach ($GRUPOS as $k => $g): ?>
-      <div class="hoja" id="h-<?= e($k) ?>">
-        <p class="hoja__ir">Estas fotos salen en
-           <a href="<?= e($g['pagina']) ?>?ver=sitio" target="_blank" rel="noopener"><?= e($g['pagina']) ?></a>.</p>
-
-        <?php foreach ($g['ranuras'] as $r):
-          $ruta    = imagen($r['id']);
-          $archivo = RAIZ . '/assets/' . $ruta;
-          $medida  = @getimagesize($archivo);
-          $cambiada = imagen_cambiada($r['id']);
-        ?>
-          <article class="tarjeta">
-            <div class="tarjeta__prev">
-              <?php if ($medida): ?>
-                <img src="/assets/<?= e($ruta) ?>?v=<?= (int)@filemtime($archivo) ?>" alt="" loading="lazy">
-              <?php else: ?>
-                <span style="color:#9aa3ae;font-size:12px">falta el archivo</span>
-              <?php endif; ?>
-            </div>
-            <div>
-              <h3><?= e($r['titulo']) ?><?php if ($cambiada): ?><span class="marbete">cambiada</span><?php endif; ?></h3>
-              <p><b>Dónde se ve:</b> <?= e($r['donde']) ?></p>
-              <p><b>Qué poner:</b> <?= e($r['que']) ?></p>
-              <p class="ficha">
-                <?= e($r['forma']) ?>
-                <?php if ($medida): ?> · hoy: <?= (int)$medida[0] ?>×<?= (int)$medida[1] ?> px,
-                  <?= (int)round((int)@filesize($archivo) / 1024) ?> KB<?php endif; ?>
-                · <code><?= e(basename($ruta)) ?></code>
-              </p>
-
-              <form method="post" enctype="multipart/form-data">
-                <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
-                <input type="hidden" name="pestana" value="<?= e($k) ?>">
-                <input type="file" name="foto" accept="image/jpeg,image/png,image/webp"
-                       aria-label="Foto nueva para <?= e($r['titulo']) ?>">
-                <button name="imagen_subir" value="<?= e($r['id']) ?>">Cambiar</button>
-                <?php if ($cambiada): ?>
-                  <button class="volver" name="imagen_restaurar" value="<?= e($r['id']) ?>"
-                          onclick="return confirm('¿Volver a la foto original del sitio?')">Volver a la original</button>
-                <?php endif; ?>
-                <span class="sello-op">
-                  <label><input type="checkbox" name="sello" value="1"> Estampar el logo de IFK</label>
-                  <select name="esquina" aria-label="Esquina del logo">
-                    <?php foreach (sello_esquinas() as $clave => $texto): ?>
-                      <option value="<?= e($clave) ?>" <?= $clave === $r['esquina'] ? 'selected' : '' ?>><?= e($texto) ?></option>
-                    <?php endforeach; ?>
-                  </select>
-                </span>
-              </form>
-            </div>
-          </article>
-        <?php endforeach; ?>
+    <?php if (cliente_tiene_clave()): ?>
+      <div class="fila">
+        <form method="post" onsubmit="return confirm('¿Quitarle el acceso al cliente?')">
+          <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
+          <button name="clave_cliente_quitar" value="1" style="background:#fdecec;color:#8a2020">Quitar el acceso</button>
+        </form>
       </div>
-    <?php endforeach; ?>
+    <?php endif; ?>
   </section>
-
-  <?php if (isset($_POST['pestana'])): ?>
-    <script>document.getElementById('imagenes')?.scrollIntoView();</script>
-  <?php endif; ?>
 <?php endif; ?>
 
 </main>

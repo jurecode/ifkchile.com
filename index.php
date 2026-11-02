@@ -24,6 +24,10 @@ require __DIR__ . '/app/sitio.php';
    habría salido HTML y PHP no deja abrirla después. */
 sesion_panel();
 
+/* El cliente, con su sesión del panel de fotos abierta, también puede mirar
+   el sitio mientras siga oculto al público: cambia una foto y quiere verla. */
+if (!empty($_COOKIE['fotos'])) require_once __DIR__ . '/app/cliente.php';
+
 $ruta = trim((string)parse_url((string)$_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 
 /* ---------------- El panel ---------------- */
@@ -33,12 +37,19 @@ if ($ruta === 'admin' || $ruta === 'panel' || $ruta === 'panel.php') {
     exit;
 }
 
+/* ---------------- El panel de fotos del cliente ---------------- */
+
+if ($ruta === 'fotos' || $ruta === 'fotos.php') {
+    require __DIR__ . '/fotos.php';
+    exit;
+}
+
 /* ---------------- robots.txt ---------------- */
 
 if ($ruta === 'robots.txt') {
     header('Content-Type: text/plain; charset=utf-8');
     if (estado_sitio() === 'publicado') {
-        echo "User-agent: *\nAllow: /\nDisallow: /admin\n\nSitemap: " . $SITE['dominio'] . "/sitemap.xml\n";
+        echo "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /fotos\n\nSitemap: " . $SITE['dominio'] . "/sitemap.xml\n";
     } else {
         /* Sitio a medias: mejor que ningún buscador lo guarde todavía. */
         echo "User-agent: *\nDisallow: /\n";

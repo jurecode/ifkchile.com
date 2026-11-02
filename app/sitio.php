@@ -111,9 +111,16 @@ function guardar_modo_vista(string $modo): void {
     $_SESSION['ver'] = $modo === 'sitio' ? 'sitio' : 'fachada';
 }
 
-/** ¿Este visitante puede ver el sitio completo aunque esté oculto al público? */
+/**
+ * ¿Este visitante puede ver el sitio completo aunque esté oculto al público?
+ * Puede el público si ya está publicado, la agencia desde /admin, y el
+ * cliente mientras tenga abierto su panel de fotos: acaba de cambiar una y
+ * lo primero que hace es ir a verla.
+ */
 function puede_ver_sitio(): bool {
-    return estado_sitio() === 'publicado' || (admin_dentro() && modo_vista() === 'sitio');
+    if (estado_sitio() === 'publicado') return true;
+    if (admin_dentro() && modo_vista() === 'sitio') return true;
+    return function_exists('cliente_dentro') && cliente_dentro();
 }
 
 /* ------------------------------------------------------------------ */
